@@ -1,6 +1,9 @@
 import { ReactNode, Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
+
+// Force dynamic rendering for all dashboard routes
+export const dynamic = 'force-dynamic'
 import { cn } from '@/lib/utils'
 import { 
   LayoutDashboard,

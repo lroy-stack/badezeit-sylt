@@ -1,3 +1,6 @@
+// Force dynamic rendering for authenticated route
+export const dynamic = 'force-dynamic'
+
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
