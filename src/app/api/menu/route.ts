@@ -132,70 +132,78 @@ export async function GET(request: NextRequest) {
       whereClause.containsPeanuts = false
     }
 
-    // Get menu categories
+    // Simplified query to avoid prepared statement conflicts
+    // First get categories
     const categories = await db.menuCategory.findMany({
       where: { isActive: true },
-      orderBy: { displayOrder: 'asc' },
-      include: {
-        menuItems: {
-          where: whereClause,
-          orderBy: [
-            { isSignature: 'desc' },
-            { displayOrder: 'asc' },
-            { name: 'asc' }
-          ],
-          select: {
-            id: true,
-            name: true,
-            nameEn: true,
-            description: true,
-            descriptionEn: true,
-            price: true,
-            isSignature: true,
-            isNew: true,
-            isSeasonalSpecial: true,
-            isVegetarian: true,
-            isVegan: true,
-            isGlutenFree: true,
-            isLactoseFree: true,
-            // Allergen information
-            containsGluten: true,
-            containsMilk: true,
-            containsEggs: true,
-            containsNuts: true,
-            containsFish: true,
-            containsShellfish: true,
-            containsSoy: true,
-            containsCelery: true,
-            containsMustard: true,
-            containsSesame: true,
-            containsSulfites: true,
-            containsLupin: true,
-            containsMollusks: true,
-            containsPeanuts: true,
-            images: true,
-            displayOrder: true,
-          }
-        }
+      orderBy: { displayOrder: 'asc' }
+    })
+
+    // Then get menu items separately to avoid complex joins
+    const allMenuItems = await db.menuItem.findMany({
+      where: whereClause,
+      orderBy: [
+        { isSignature: 'desc' },
+        { displayOrder: 'asc' },
+        { name: 'asc' }
+      ],
+      select: {
+        id: true,
+        categoryId: true,
+        name: true,
+        nameEn: true,
+        description: true,
+        descriptionEn: true,
+        price: true,
+        isSignature: true,
+        isNew: true,
+        isSeasonalSpecial: true,
+        isVegetarian: true,
+        isVegan: true,
+        isGlutenFree: true,
+        isLactoseFree: true,
+        // Allergen information
+        containsGluten: true,
+        containsMilk: true,
+        containsEggs: true,
+        containsNuts: true,
+        containsFish: true,
+        containsShellfish: true,
+        containsSoy: true,
+        containsCelery: true,
+        containsMustard: true,
+        containsSesame: true,
+        containsSulfites: true,
+        containsLupin: true,
+        containsMollusks: true,
+        containsPeanuts: true,
+        images: true,
+        displayOrder: true,
       }
     })
 
-    // Filter out empty categories if no items match the filter
-    const categoriesWithItems = categories.filter(category => category.menuItems.length > 0)
+    // Combine categories with their menu items
+    const categoriesWithItems = categories.map(category => ({
+      ...category,
+      menuItems: allMenuItems.filter(item => item.categoryId === category.id)
+    }))
 
-    // Get summary statistics
-    const totalItems = categoriesWithItems.reduce((sum, category) => sum + category.menuItems.length, 0)
-    const signatureItems = categoriesWithItems.reduce((sum, category) => 
+    // Filter out empty categories if no items match the filter  
+    const finalCategories = categoriesWithItems.filter(category => category.menuItems.length > 0)
+
+    // Get summary statistics from final categories
+    const totalItems = finalCategories.reduce((sum, category) => sum + category.menuItems.length, 0)
+    const signatureItems = finalCategories.reduce((sum, category) => 
       sum + category.menuItems.filter(item => item.isSignature).length, 0
     )
-    const vegetarianItems = categoriesWithItems.reduce((sum, category) => 
+    const vegetarianItems = finalCategories.reduce((sum, category) => 
       sum + category.menuItems.filter(item => item.isVegetarian).length, 0
     )
-    const veganItems = categoriesWithItems.reduce((sum, category) => 
+    const veganItems = finalCategories.reduce((sum, category) => 
       sum + category.menuItems.filter(item => item.isVegan).length, 0
     )
     
-    const prices = categoriesWithItems.flatMap(category => 
+    const prices = finalCategories.flatMap(category => 
       category.menuItems.map(item => Number(item.price))
     )
     const priceRange = prices.length > 0 ? {
@@ -205,7 +213,7 @@ export async function GET(request: NextRequest) {
     } : null
 
     return NextResponse.json({
-      categories: categoriesWithItems,
+      categories: finalCategories,
       summary: {
         totalItems,
         signatureItems,

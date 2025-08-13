@@ -42,45 +42,38 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    // Get gallery images with pagination and category stats in a single optimized query batch
-    const [images, totalCount, categoryStats] = await Promise.all([
-      // Main images query with optimized select
-      db.galleryImage.findMany({
-        where: whereClause,
-        orderBy: [
-          { displayOrder: 'asc' },
-          { createdAt: 'desc' }
-        ],
-        take: validatedFilters.limit,
-        skip: validatedFilters.offset,
-        select: {
-          id: true,
-          title: true,
-          titleEn: true,
-          description: true,
-          descriptionEn: true,
-          imageUrl: true,
-          category: true,
-          displayOrder: true,
-          createdAt: true,
-        }
-      }),
-      // Count query with same where clause for consistency
-      db.galleryImage.count({ where: whereClause }),
-      // Category statistics with parallel execution to avoid N+1
-      db.galleryImage.groupBy({
-        by: ['category'],
-        where: { isActive: true },
-        _count: {
-          category: true
-        }
-      })
-    ])
+    // Simplified query to avoid prepared statement conflicts in serverless
+    const images = await db.galleryImage.findMany({
+      where: whereClause,
+      orderBy: [
+        { displayOrder: 'asc' },
+        { createdAt: 'desc' }
+      ],
+      take: validatedFilters.limit,
+      skip: validatedFilters.offset,
+      select: {
+        id: true,
+        title: true,
+        titleEn: true,
+        description: true,
+        descriptionEn: true,
+        imageUrl: true,
+        category: true,
+        displayOrder: true,
+        createdAt: true,
+      }
+    })
 
-    const categoryDistribution = categoryStats.reduce((acc, stat) => {
-      acc[stat.category] = stat._count.category
-      return acc
-    }, {} as Record<string, number>)
+    // Simplified count query
+    const totalCount = await db.galleryImage.count({ where: whereClause })
+
+    // Simple category distribution (avoid groupBy for now)
+    const categoryDistribution: Record<string, number> = {}
+    if (images.length > 0) {
+      images.forEach(image => {
+        categoryDistribution[image.category] = (categoryDistribution[image.category] || 0) + 1
+      })
+    }
 
     // Format response
     const response = {

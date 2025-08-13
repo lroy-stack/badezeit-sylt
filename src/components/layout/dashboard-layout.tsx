@@ -2,8 +2,7 @@
 
 import { ReactNode, useState } from 'react'
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { UserButton } from "@clerk/nextjs"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -27,6 +26,7 @@ import {
   LogOut
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { createClient } from '@/utils/supabase/client'
 
 const navigation = [
   {
@@ -88,7 +88,22 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, title, subtitle, actions }: DashboardLayoutProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const supabase = createClient()
+
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    try {
+      await supabase.auth.signOut()
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      setLoggingOut(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -255,8 +270,19 @@ export function DashboardLayout({ children, title, subtitle, actions }: Dashboar
                 <Badge className="ml-1 h-2 w-2 rounded-full p-0 bg-red-500"></Badge>
               </Button>
 
-              {/* Profile dropdown */}
-              <UserButton afterSignOutUrl="/" />
+              {/* Logout button */}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleLogout}
+                disabled={loggingOut}
+              >
+                {loggingOut ? (
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+                ) : (
+                  <LogOut className="h-5 w-5" />
+                )}
+              </Button>
             </div>
           </div>
         </div>

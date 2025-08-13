@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { requireAuth, getCurrentUser } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
 import { createReservationSchema, reservationFilterSchema } from '@/lib/validations/reservation'
 import { sendReservationConfirmation } from '@/lib/email/send-email'
 import { z } from 'zod'
 
-// GET /api/reservations - List reservations with filters
+// GET /api/reservations - List reservations with filters  
 export async function GET(request: NextRequest) {
   try {
-    await requireAuth()
+    // Check if user is authenticated for dashboard access
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     
     const { searchParams } = new URL(request.url)
     const filters = {
@@ -49,9 +53,25 @@ export async function GET(request: NextRequest) {
       whereClause.tableId = validatedFilters.tableId
     }
 
+    // Simplified query to avoid prepared statement conflicts
     const reservations = await db.reservation.findMany({
       where: whereClause,
-      include: {
+      orderBy: {
+        dateTime: 'asc',
+      },
+      select: {
+        id: true,
+        customerId: true,
+        tableId: true,
+        dateTime: true,
+        partySize: true,
+        duration: true,
+        status: true,
+        specialRequests: true,
+        occasion: true,
+        dietaryNotes: true,
+        createdAt: true,
+        updatedAt: true,
         customer: {
           select: {
             id: true,
@@ -77,10 +97,7 @@ export async function GET(request: NextRequest) {
             lastName: true,
           }
         }
-      },
-      orderBy: {
-        dateTime: 'asc',
-      },
+      }
     })
 
     return NextResponse.json(reservations)
