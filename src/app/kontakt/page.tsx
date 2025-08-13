@@ -27,7 +27,10 @@ import {
 
 export default function KontaktPage() {
   const [language, setLanguage] = useState<'de' | 'en'>('de')
-  const [state, formAction, pending] = useActionState(sendContactForm, { message: '' })
+  const [state, formAction, pending] = useActionState(sendContactForm, { 
+    message: '',
+    errors: {}
+  })
 
   const content = {
     de: {

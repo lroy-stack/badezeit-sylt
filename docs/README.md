@@ -69,6 +69,42 @@ Willkommen zur technischen Dokumentation der Badezeit-Website. Diese Sammlung vo
 - Performance-Monitoring
 - Notfall-Prozeduren
 
+### 💼 [Admin-Panel Dokumentation (ADMIN_PANEL.md)](./ADMIN_PANEL.md)
+**Zweck**: Vollständige Funktionsbeschreibung des Verwaltungssystems  
+**Zielgruppe**: Restaurant-Team und System-Administratoren  
+**Inhalt**:
+- Detaillierte Modulbeschreibungen
+- Benutzerrollen und Berechtigungen
+- Reservierungsmanagement
+- Kundenverwaltung (CRM)
+- Tisch- und Speisekartenmanagement
+- Analytics und Berichte
+- Sicherheit und GDPR-Compliance
+
+### 👥 [Benutzerhandbuch (BENUTZERHANDBUCH.md)](./BENUTZERHANDBUCH.md)
+**Zweck**: Praktische Anleitung für Restaurant-Mitarbeiter  
+**Zielgruppe**: Service-Personal, Küchenpersonal, Management  
+**Inhalt**:
+- Schritt-für-Schritt Anleitungen
+- Tägliche Arbeitsabläufe
+- Kundenkommunikation
+- Notfall-Situationen
+- Tipps für effizientes Arbeiten
+- Checklisten für neue Mitarbeiter
+
+### 💻 [Entwicklungshandbuch (ENTWICKLUNG.md)](./ENTWICKLUNG.md)
+**Zweck**: Umfassende Entwicklerdokumentation  
+**Zielgruppe**: Frontend- und Backend-Entwickler  
+**Inhalt**:
+- Entwicklungsumgebung Setup
+- Projekt-Architektur und Patterns
+- Komponenten-System Entwicklung
+- Custom Hooks und State Management
+- Server Actions und API-Integration
+- Testing-Strategien
+- Performance-Optimierung
+- Deployment-Workflows
+
 ### 🧩 [Komponenten-Dokumentation (COMPONENTS.md)](./COMPONENTS.md)
 **Zweck**: UI-Komponenten und Design System  
 **Zielgruppe**: Frontend-Entwickler und Designer  
@@ -84,17 +120,21 @@ Willkommen zur technischen Dokumentation der Badezeit-Website. Diese Sammlung vo
 
 ### 👥 Restaurant-Team (Norbert Mangelsen & Mitarbeiter)
 **Relevante Dokumente**:
+- [BENUTZERHANDBUCH.md](./BENUTZERHANDBUCH.md) - Praktische Arbeitsanleitung
+- [ADMIN_PANEL.md](./ADMIN_PANEL.md) - Vollständige Funktionsübersicht
 - [README.md](../README.md) - Projekt-Übersicht
-- [MAINTENANCE.md](./MAINTENANCE.md) - Inhalts-Updates
+- [MAINTENANCE.md](./MAINTENANCE.md) - Wartung und Updates
 
 **Häufige Aufgaben**:
-- Restaurant-Informationen aktualisieren
-- Öffnungszeiten ändern
-- Kontaktformular-Nachrichten bearbeiten
-- Status-Updates (Wiedereröffnung 2025)
+- Reservierungen verwalten und bearbeiten
+- Kundendaten pflegen und aktualisieren
+- Tischbelegung optimieren
+- Speisekarte aktualisieren (Verfügbarkeit)
+- Berichte und Statistiken interpretieren
 
 ### 💻 Frontend-Entwickler
 **Relevante Dokumente**:
+- [ENTWICKLUNG.md](./ENTWICKLUNG.md) - Umfassende Entwickleranleitung
 - [README.md](../README.md) - Setup und Entwicklung
 - [COMPONENTS.md](./COMPONENTS.md) - UI-Komponenten
 - [API.md](./API.md) - Server Actions
@@ -103,19 +143,22 @@ Willkommen zur technischen Dokumentation der Badezeit-Website. Diese Sammlung vo
 **Häufige Aufgaben**:
 - Neue Komponenten entwickeln
 - Responsive Design implementieren
-- Formular-Validierung
+- Custom Hooks implementieren
+- Server Actions integrieren
 - Performance-Optimierung
 
 ### 🗄️ Backend-Entwickler
 **Relevante Dokumente**:
+- [ENTWICKLUNG.md](./ENTWICKLUNG.md) - Vollständige Entwicklerdokumentation
 - [DATABASE.md](./DATABASE.md) - Schema und Queries
-- [API.md](./API.md) - Server Actions
+- [API.md](./API.md) - Server Actions und Endpunkte
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - Backend-Patterns
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - Infrastruktur
 
 **Häufige Aufgaben**:
 - Datenbankschema erweitern
-- Server Actions implementieren
+- Server Actions implementieren  
+- E-Mail-Templates entwickeln
 - Performance-Optimierung
 - Security-Updates
 
@@ -138,14 +181,20 @@ Willkommen zur technischen Dokumentation der Badezeit-Website. Diese Sammlung vo
 
 #### 🏁 Erste Schritte
 1. [README.md](../README.md) - Projekt-Setup
-2. [DEPLOYMENT.md](./DEPLOYMENT.md) - Production-Deployment
-3. [MAINTENANCE.md](./MAINTENANCE.md) - Wartungsaufgaben
+2. [BENUTZERHANDBUCH.md](./BENUTZERHANDBUCH.md) - Restaurant-Team Einführung
+3. [DEPLOYMENT.md](./DEPLOYMENT.md) - Production-Deployment
+4. [MAINTENANCE.md](./MAINTENANCE.md) - Wartungsaufgaben
 
 #### 🔧 Entwicklung
-1. [ARCHITECTURE.md](./ARCHITECTURE.md) - Technische Architektur
-2. [COMPONENTS.md](./COMPONENTS.md) - UI-Entwicklung
-3. [API.md](./API.md) - Backend-Entwicklung
-4. [DATABASE.md](./DATABASE.md) - Datenbank-Entwicklung
+1. [ENTWICKLUNG.md](./ENTWICKLUNG.md) - Vollständiger Entwickler-Guide
+2. [ARCHITECTURE.md](./ARCHITECTURE.md) - Technische Architektur
+3. [COMPONENTS.md](./COMPONENTS.md) - UI-Entwicklung
+4. [API.md](./API.md) - Backend-Entwicklung
+5. [DATABASE.md](./DATABASE.md) - Datenbank-Entwicklung
+
+#### 🍽️ Restaurant-Management
+1. [ADMIN_PANEL.md](./ADMIN_PANEL.md) - Funktionsübersicht
+2. [BENUTZERHANDBUCH.md](./BENUTZERHANDBUCH.md) - Praktische Arbeitsanweisungen
 
 #### 🚀 Betrieb
 1. [DEPLOYMENT.md](./DEPLOYMENT.md) - Deployment-Prozess
@@ -155,17 +204,20 @@ Willkommen zur technischen Dokumentation der Badezeit-Website. Diese Sammlung vo
 ### Nach Komplexität
 
 #### 📚 Einsteiger
-- [README.md](../README.md) - Grundlagen
+- [README.md](../README.md) - Grundlagen und Setup
+- [BENUTZERHANDBUCH.md](./BENUTZERHANDBUCH.md) - Restaurant-Team Guide
 - [MAINTENANCE.md](./MAINTENANCE.md) - Einfache Updates
 
-#### 🎓 Fortgeschritten
-- [API.md](./API.md) - Server Actions
+#### 🎓 Fortgeschritten  
+- [ADMIN_PANEL.md](./ADMIN_PANEL.md) - Vollständige Funktionsübersicht
+- [API.md](./API.md) - Server Actions und APIs
 - [COMPONENTS.md](./COMPONENTS.md) - Component-Entwicklung
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deployment
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deployment-Strategien
 
 #### 🎯 Experten
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - System-Design
-- [DATABASE.md](./DATABASE.md) - DB-Optimierung
+- [ENTWICKLUNG.md](./ENTWICKLUNG.md) - Vollständige Entwicklerdokumentation
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - System-Design und Patterns
+- [DATABASE.md](./DATABASE.md) - DB-Optimierung und Performance
 
 ## 📋 Wartung dieser Dokumentation
 
@@ -228,4 +280,4 @@ Wenn Sie Änderungen an der Dokumentation vornehmen:
 **Strandrestaurant Badezeit** - Authentische maritime Küche am Westerland Beach, Sylt  
 *Wiedereröffnung 2025 nach dem Brand*
 
-Letzte Aktualisierung: Januar 2024
+Letzte Aktualisierung: Januar 2025

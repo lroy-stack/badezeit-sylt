@@ -134,32 +134,107 @@ npm run db:reset     # Datenbank zurücksetzen und neu seeden
 badezeit-sylt/
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── (auth)/            # Authentifizierung
+│   │   ├── (auth)/            # Authentifizierung (Clerk)
+│   │   │   ├── sign-in/       # Anmelde-Seite
+│   │   │   └── sign-up/       # Registrierungs-Seite
 │   │   ├── actions/           # Server Actions
+│   │   │   └── contact.ts     # Kontaktformular-Action
 │   │   ├── api/               # API Routes
-│   │   ├── globals.css        # Globale Styles
+│   │   │   ├── webhooks/      # Clerk Webhooks
+│   │   │   ├── availability/  # Verfügbarkeitsprüfung
+│   │   │   ├── reservations/  # Reservierungen API
+│   │   │   ├── customers/     # Kunden API (GDPR-konform)
+│   │   │   ├── menu/          # Speisekarten API
+│   │   │   ├── gallery/       # Galerie API
+│   │   │   ├── settings/      # System-Einstellungen
+│   │   │   └── dashboard/     # Dashboard-Metriken
+│   │   ├── dashboard/         # Admin-Panel
+│   │   │   ├── layout.tsx     # Dashboard Layout mit Navigation
+│   │   │   ├── page.tsx       # Dashboard-Übersicht
+│   │   │   ├── reservierungen/ # Reservierungsmanagement
+│   │   │   │   ├── page.tsx   # Reservierungsliste
+│   │   │   │   ├── neu/       # Neue Reservierung
+│   │   │   │   ├── [id]/      # Reservierungsdetails
+│   │   │   │   └── components/ # Reservierungs-Komponenten
+│   │   │   └── kunden/        # Kundenverwaltung (CRM)
+│   │   │       ├── page.tsx   # Kundenliste
+│   │   │       ├── [id]/      # Kundendetails
+│   │   │       └── components/ # Kunden-Komponenten
+│   │   ├── globals.css        # Globale Styles & Design System
 │   │   ├── layout.tsx         # Root Layout
 │   │   ├── page.tsx           # Homepage
 │   │   ├── kontakt/           # Kontakt-Seite
 │   │   ├── ueber-uns/         # Über uns Seite
-│   │   ├── speisekarte/       # Speisekarte
+│   │   ├── speisekarte/       # Öffentliche Speisekarte
 │   │   ├── galerie/           # Bildergalerie
-│   │   └── reservierung/      # Reservierungssystem
+│   │   └── reservierung/      # Online-Reservierungssystem
 │   ├── components/            # React Komponenten
-│   │   ├── ui/                # shadcn/ui Komponenten
-│   │   └── layout/            # Layout-Komponenten
+│   │   ├── ui/                # shadcn/ui Base Components
+│   │   │   ├── button.tsx     # Button-Komponente
+│   │   │   ├── form.tsx       # Formular-Komponenten
+│   │   │   ├── dialog.tsx     # Modal-Dialoge
+│   │   │   ├── table.tsx      # Tabellen-Komponente
+│   │   │   └── lightbox.tsx   # Bildergalerie Lightbox
+│   │   ├── layout/            # Layout-Komponenten
+│   │   │   ├── header.tsx     # Website-Header
+│   │   │   ├── footer.tsx     # Website-Footer
+│   │   │   ├── public-layout.tsx   # Öffentliches Layout
+│   │   │   ├── dashboard-layout.tsx # Admin-Layout
+│   │   │   └── breadcrumbs.tsx     # Navigation
+│   │   └── providers/         # React Context Provider
+│   │       └── query-provider.tsx  # TanStack Query
+│   ├── hooks/                 # Custom React Hooks
+│   │   ├── use-reservations.ts # Reservierungs-Hook
+│   │   ├── use-customers.ts    # Kunden-Hook
+│   │   ├── use-availability.ts # Verfügbarkeits-Hook
+│   │   ├── use-menu.ts        # Speisekarten-Hook
+│   │   ├── use-gallery.ts     # Galerie-Hook
+│   │   ├── use-settings.ts    # System-Settings Hook
+│   │   └── use-dashboard-metrics.ts # Dashboard-Daten
+│   ├── middleware/            # Middleware-Logik
+│   │   ├── types.ts           # Middleware-Typen
+│   │   ├── prod.ts            # Produktions-Middleware
+│   │   └── dev.ts             # Entwicklungs-Middleware
 │   └── lib/                   # Utilities & Konfiguration
-│       ├── db.ts              # Prisma Client
-│       ├── auth.ts            # Auth Utilities
-│       └── email/             # Email Templates
+│       ├── db.ts              # Prisma Client Setup
+│       ├── auth.ts            # Auth Utilities & Rollen
+│       ├── utils.ts           # Utility-Funktionen
+│       ├── restaurant-utils.ts # Restaurant-spezifische Utils
+│       ├── email/             # E-Mail System
+│       │   ├── send-email.ts  # Resend Integration
+│       │   └── templates/     # React Email Templates
+│       │       ├── reservation-confirmation.tsx
+│       │       ├── reservation-reminder.tsx
+│       │       ├── reservation-cancellation.tsx
+│       │       ├── newsletter-welcome.tsx
+│       │       └── staff-invitation.tsx
+│       └── validations/       # Zod Schema-Validierung
+│           ├── customer.ts    # Kunden-Validierung
+│           ├── reservation.ts # Reservierungs-Validierung
+│           ├── menu.ts        # Speisekarten-Validierung
+│           ├── table.ts       # Tisch-Validierung
+│           ├── user.ts        # Benutzer-Validierung
+│           ├── gallery.ts     # Galerie-Validierung
+│           └── dashboard.ts   # Dashboard-Validierung
 ├── prisma/
-│   ├── schema.prisma          # Datenbank Schema
-│   └── seed.ts                # Seed Daten
-├── public/                    # Statische Assets
-├── middleware.ts              # Next.js Middleware
-├── tailwind.config.js         # Tailwind Konfiguration
+│   ├── schema.prisma          # Vollständiges DB-Schema
+│   ├── seed.ts                # Beispieldaten
+│   └── migrations/            # Datenbank-Migrationen
+├── docs/                      # Technische Dokumentation
+│   ├── README.md              # Dokumentations-Übersicht
+│   ├── ARCHITECTURE.md        # System-Architektur
+│   ├── DATABASE.md            # Datenbank-Schema
+│   ├── API.md                 # API-Dokumentation
+│   ├── COMPONENTS.md          # Komponenten-Guide
+│   ├── DEPLOYMENT.md          # Deployment-Guide
+│   └── MAINTENANCE.md         # Wartungshandbuch
+├── middleware.ts              # Next.js Middleware (Auth/Routing)
+├── tailwind.config.js         # Tailwind CSS Konfiguration
+├── components.json            # shadcn/ui Konfiguration
 ├── tsconfig.json              # TypeScript Konfiguration
-└── package.json               # Dependencies
+├── eslint.config.mjs          # ESLint Konfiguration
+├── next.config.ts             # Next.js Konfiguration
+└── package.json               # Dependencies & Scripts
 ```
 
 ## 🌐 Website-Features
@@ -179,27 +254,68 @@ badezeit-sylt/
 - **SEO-optimiert**: Meta-Tags und strukturierte Daten
 - **Performance**: Optimierte Bilder und Lazy Loading
 
-## 💼 Admin-Dashboard (geplant)
+## 💼 Admin-Dashboard
 
-Das umfassende Restaurantmanagement-System umfasst:
+Das umfassende Restaurantmanagement-System bietet folgende Module:
 
-### Reservierungsmanagement
-- Tischbelegung und Reservierungen
-- Kundenverwaltung und -historie
-- Automatische E-Mail-Bestätigungen
-- QR-Code-System für Tische
+### 📊 Dashboard-Übersicht
+- **Kernmetriken**: Heutige Reservierungen, Umsätze, Auslastung
+- **Schnellaktionen**: Neue Reservierung, Kundensuche, Tischübersicht
+- **Echtzeit-Updates**: Live-Status aller Tische und Reservierungen
+- **Rollenbasierte Ansichten**: Angepasste Inhalte je nach Benutzerrolle
 
-### Menü- & Inhaltsverwaltung
-- Speisekarte mit Preisen und Allergenen
-- Bildergalerie-Management
-- CMS für Website-Inhalte
-- Newsletter-System
+### 📅 Reservierungsmanagement
+- **Reservierungskalender**: Tages-, Wochen- und Monatsansicht
+- **Tischbelegung**: Visueller Grundriss mit Echtzeit-Status
+- **Kundeninformationen**: Vollständige CRM-Integration
+- **Status-Management**: PENDING, CONFIRMED, SEATED, COMPLETED, CANCELLED
+- **E-Mail-Automation**: Bestätigungen, Erinnerungen, Stornierungen
+- **Sonderanfragen**: Anlässe, Diätvorschriften, besondere Wünsche
 
-### Analytics & Reporting
-- Besucherstatistiken
-- Reservierungs-Analytics
-- Umsatzberichte
-- GDPR-konforme Datenanalyse
+### 👥 Kundenverwaltung (CRM)
+- **Kundenprofile**: Vollständige Kontaktdaten und Präferenzen
+- **Besuchshistorie**: Detaillierte Reservierungs- und Ausgabenhistorie
+- **Notizen-System**: Wichtige Informationen und Präferenzen
+- **GDPR-Compliance**: Einverständniserklärungen und Datenschutz
+- **VIP-Status**: Besondere Kennzeichnung für Stammkunden
+- **Statistiken**: Gesamtbesuche, durchschnittliche Gruppengröße, Gesamtausgaben
+
+### 🪑 Tischmanagement
+- **Tischkonfiguration**: Kapazität, Standort, Eigenschaften
+- **Grundriss-Editor**: Visuelle Anordnung mit X/Y-Koordinaten
+- **Standortkategorien**: Terrasse Meerblick, Terrasse Standard, Innenbereich
+- **QR-Code-System**: Automatische QR-Codes für kontaktlose Speisekarten
+- **Verfügbarkeitsstatus**: Aktiv/Inaktiv, Wartungsmodus
+
+### 🍽️ Speisekartenmanagement
+- **Kategorien**: Hierarchische Organisation der Gerichte
+- **Mehrsprachigkeit**: Deutsch (primär) und Englisch
+- **Allergen-Management**: EU-konforme 14 Allergenkennzeichnung
+- **Diät-Labels**: Vegetarisch, Vegan, Glutenfrei, Laktosefrei
+- **Verfügbarkeitszeiträume**: Saisonale und zeitlich begrenzte Angebote
+- **Preismanagement**: Flexible Preisgestaltung
+- **Bildintegration**: Multiple Produktbilder pro Gericht
+
+### 📈 Analytics & Berichte
+- **Dashboard-Metriken**: Reservierungsstatistiken, Umsätze, Trends
+- **Kundensegmentierung**: VIP-Kunden, Stammkunden, Neukunden
+- **Tischauslastung**: Optimierung der Tischnutzung
+- **Saisonale Trends**: Analyse von Buchungsmustern
+- **GDPR-konforme Auswertungen**: Anonymisierte Datenanalyse
+
+### ⚙️ Systemeinstellungen
+- **Betriebszeiten**: Flexible Öffnungszeiten-Konfiguration
+- **Reservierungsregeln**: Vorlaufzeiten, maximale Gruppengröße
+- **E-Mail-Templates**: Anpassbare Kommunikationsvorlagen
+- **Systemparameter**: Zeitzone, Sprache, Währung
+- **Benutzerrollen**: ADMIN, MANAGER, STAFF, KITCHEN
+
+### 🔒 Sicherheit & Compliance
+- **Rollenbasierte Zugriffskontrolle**: Granulare Berechtigungen
+- **GDPR-Compliance**: Vollständige Datenschutz-Integration
+- **Audit-Logs**: Nachverfolgung aller Systemaktivitäten
+- **Datensicherung**: Automatische Backups und Recovery
+- **Entwicklungsmodus**: Automatische Deaktivierung ohne Auth-Keys
 
 ## 🔧 Technische Details
 

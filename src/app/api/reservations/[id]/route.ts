@@ -8,13 +8,14 @@ import { z } from 'zod'
 // GET /api/reservations/[id] - Get single reservation
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth()
+    const resolvedParams = await params
     
     const reservation = await db.reservation.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       include: {
         customer: {
           select: {
@@ -82,21 +83,22 @@ export async function GET(
 // PATCH /api/reservations/[id] - Update reservation
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth()
+    const resolvedParams = await params
     const body = await request.json()
     
     // Validate request data
     const validatedData = updateReservationSchema.parse({
       ...body,
-      id: params.id
+      id: resolvedParams.id
     })
 
     // Check if reservation exists
     const existingReservation = await db.reservation.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       include: {
         customer: true,
         table: true,
@@ -118,7 +120,7 @@ export async function PATCH(
       const conflictingReservation = await db.reservation.findFirst({
         where: {
           tableId: validatedData.tableId,
-          id: { not: params.id }, // Exclude current reservation
+          id: { not: resolvedParams.id }, // Exclude current reservation
           status: {
             in: ['PENDING', 'CONFIRMED', 'SEATED']
           },
@@ -155,7 +157,7 @@ export async function PATCH(
 
     // Update reservation
     const updatedReservation = await db.reservation.update({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       data: updateData,
       include: {
         customer: true,
@@ -209,14 +211,15 @@ export async function PATCH(
 // DELETE /api/reservations/[id] - Cancel reservation (soft delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireRole(['ADMIN', 'MANAGER', 'STAFF'])
+    const resolvedParams = await params
     
     // Check if reservation exists
     const existingReservation = await db.reservation.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       include: {
         customer: true,
       }
@@ -238,7 +241,7 @@ export async function DELETE(
 
     // Update reservation status to cancelled
     const cancelledReservation = await db.reservation.update({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       data: {
         status: 'CANCELLED',
         cancelledAt: new Date(),

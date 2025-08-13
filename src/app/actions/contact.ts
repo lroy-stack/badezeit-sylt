@@ -28,9 +28,10 @@ export async function sendContactForm(initialState: any, formData: FormData) {
     })
 
     if (!validatedData.success) {
+      const language = formData.get('language') as string || 'de'
       return {
         errors: validatedData.error.flatten().fieldErrors,
-        message: validatedData.data?.language === 'en' 
+        message: language === 'en' 
           ? 'Please check the form and try again.'
           : 'Bitte überprüfen Sie das Formular und versuchen Sie es erneut.'
       }
