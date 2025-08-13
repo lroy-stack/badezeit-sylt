@@ -88,14 +88,19 @@ export function PhotoManager({ userRole }: PhotoManagerProps) {
   const canEdit = ['ADMIN', 'MANAGER'].includes(userRole)
 
   // Fetch gallery images and categories
-  const { data: images = [], isLoading: imagesLoading } = useQuery({
+  const { data: galleryData, isLoading: imagesLoading, error: imagesError } = useQuery({
     queryKey: ['gallery-images'],
     queryFn: async () => {
       const response = await fetch('/api/gallery')
-      if (!response.ok) throw new Error('Failed to fetch gallery images')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch gallery images`)
+      }
       return response.json()
     }
   })
+
+  const images = galleryData?.images || []
 
   const { data: categories = [] } = useQuery({
     queryKey: ['menu-categories-simple'],
@@ -107,7 +112,7 @@ export function PhotoManager({ userRole }: PhotoManagerProps) {
   })
 
   // Filter photos based on search and category
-  const filteredPhotos = images.filter((photo: any) => {
+  const filteredPhotos = Array.isArray(images) ? images.filter((photo: any) => {
     const matchesSearch = searchQuery === '' || 
       photo.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       photo.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -115,11 +120,11 @@ export function PhotoManager({ userRole }: PhotoManagerProps) {
     const matchesCategory = selectedCategory === 'all' || photo.category === selectedCategory
     
     return matchesSearch && matchesCategory
-  })
+  }) : []
 
   // Calculate statistics
-  const totalPhotos = images.length
-  const totalSize = images.length * 1.5 // Estimated average size
+  const totalPhotos = Array.isArray(images) ? images.length : 0
+  const totalSize = totalPhotos * 1.5 // Estimated average size
 
   return (
     <div className="space-y-6">
@@ -318,7 +323,19 @@ export function PhotoManager({ userRole }: PhotoManagerProps) {
       </Card>
 
       {/* Photos Display */}
-      {imagesLoading ? (
+      {imagesError ? (
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center py-8 text-destructive">
+              <Camera className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">Fehler beim Laden der Fotos</h3>
+              <p className="text-sm text-muted-foreground">
+                {imagesError.message || 'Fotos konnten nicht geladen werden'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : imagesLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="h-64 bg-muted rounded animate-pulse" />
