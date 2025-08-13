@@ -30,7 +30,7 @@ export default function LoginPage() {
       })
 
       if (signInError) {
-        setError('Credenciales incorrectas. Intenta con: demouser@badezeit.de / badezeit00')
+        setError('Falsche Anmeldedaten. Demo: demouser@badezeit.de / badezeit00')
         return
       }
 
@@ -38,7 +38,7 @@ export default function LoginPage() {
         router.push('/dashboard')
       }
     } catch (err) {
-      setError('Error de conexión. Por favor intenta nuevamente.')
+      setError('Verbindungsfehler. Bitte versuchen Sie es erneut.')
     } finally {
       setLoading(false)
     }
@@ -70,7 +70,7 @@ export default function LoginPage() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">Passwort</Label>
               <Input
                 id="password"
                 type="password"
@@ -96,19 +96,19 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Iniciando sesión...
+                  Anmeldung läuft...
                 </>
               ) : (
-                'Iniciar Sesión'
+                'Anmelden'
               )}
             </Button>
           </form>
 
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-sm mb-2">Credenciales Demo:</h3>
+            <h3 className="font-semibold text-sm mb-2">Demo-Zugangsdaten:</h3>
             <p className="text-sm text-muted-foreground">
-              <strong>Email:</strong> demouser@badezeit.de<br />
-              <strong>Contraseña:</strong> badezeit00
+              <strong>E-Mail:</strong> demouser@badezeit.de<br />
+              <strong>Passwort:</strong> badezeit00
             </p>
           </div>
         </CardContent>
