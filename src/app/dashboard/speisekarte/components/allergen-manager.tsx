@@ -47,14 +47,17 @@ export function AllergenManager({ userRole }: AllergenManagerProps) {
   const canEdit = ['ADMIN', 'MANAGER', 'KITCHEN'].includes(userRole)
 
   // Fetch menu items with allergen information
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading, error } = useQuery({
     queryKey: ['menu-items-allergens', selectedAllergen, searchQuery],
     queryFn: async () => {
       const params = new URLSearchParams()
       if (searchQuery) params.set('search', searchQuery)
       
       const response = await fetch(`/api/menu/items?${params}`)
-      if (!response.ok) throw new Error('Failed to fetch items')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch items`)
+      }
       return response.json()
     }
   })
@@ -84,6 +87,22 @@ export function AllergenManager({ userRole }: AllergenManagerProps) {
           <div key={i} className="h-32 bg-muted rounded animate-pulse" />
         ))}
       </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center py-8 text-destructive">
+            <AlertTriangle className="h-12 w-12 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Fehler beim Laden</h3>
+            <p className="text-sm text-muted-foreground">
+              {error.message || 'Allergen-Daten konnten nicht geladen werden'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 

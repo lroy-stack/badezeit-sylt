@@ -11,7 +11,7 @@ export const createMenuCategorySchema = z.object({
 })
 
 export const updateMenuCategorySchema = z.object({
-  id: z.string().cuid(),
+  id: z.string().min(1),
   name: z.string().min(1).max(100).optional(),
   nameEn: z.string().max(100).optional(),
   description: z.string().max(500).optional(),
@@ -22,7 +22,7 @@ export const updateMenuCategorySchema = z.object({
 })
 
 export const createMenuItemSchema = z.object({
-  categoryId: z.string().cuid('Kategorie ist erforderlich'),
+  categoryId: z.string().min(1, 'Kategorie ist erforderlich'),
   name: z.string().min(1, 'Gerichtname ist erforderlich').max(150),
   nameEn: z.string().max(150).optional(),
   description: z.string().min(1, 'Beschreibung ist erforderlich').max(1000),
@@ -65,8 +65,8 @@ export const createMenuItemSchema = z.object({
 })
 
 export const updateMenuItemSchema = z.object({
-  id: z.string().cuid(),
-  categoryId: z.string().cuid().optional(),
+  id: z.string().min(1),
+  categoryId: z.string().min(1).optional(),
   name: z.string().min(1).max(150).optional(),
   nameEn: z.string().max(150).optional(),
   description: z.string().min(1).max(1000).optional(),
@@ -109,7 +109,7 @@ export const updateMenuItemSchema = z.object({
 })
 
 export const menuFilterSchema = z.object({
-  categoryId: z.string().cuid().optional(),
+  categoryId: z.string().min(1).optional(),
   search: z.string().max(100).optional(),
   isAvailable: z.boolean().optional(),
   isSignature: z.boolean().optional(),
@@ -137,10 +137,10 @@ export const menuFilterSchema = z.object({
 })
 
 export const bulkMenuUpdateSchema = z.object({
-  itemIds: z.array(z.string().cuid()).min(1, 'Mindestens ein Gericht auswählen'),
+  itemIds: z.array(z.string().min(1)).min(1, 'Mindestens ein Gericht auswählen'),
   updates: z.object({
     isAvailable: z.boolean().optional(),
-    categoryId: z.string().cuid().optional(),
+    categoryId: z.string().min(1).optional(),
     price: z.number().min(0.01).max(999.99).optional(),
     displayOrder: z.number().int().min(0).optional(),
   }),

@@ -196,7 +196,10 @@ export function ItemManager({ userRole }: ItemManagerProps) {
       if (dietaryFilter === 'gluten-free') params.set('isGlutenFree', 'true')
       
       const response = await fetch(`/api/menu/items?${params}`)
-      if (!response.ok) throw new Error('Failed to fetch items')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch items`)
+      }
       return response.json()
     }
   })
