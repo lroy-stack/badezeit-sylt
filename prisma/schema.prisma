@@ -1,0 +1,395 @@
+// Badezeit Sylt Restaurant Platform Database Schema
+// Complete restaurant management system with German GDPR compliance
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management & Authentication
+model User {
+  id              String   @id @default(cuid())
+  clerkId         String   @unique
+  email           String   @unique
+  firstName       String?
+  lastName        String?
+  role            UserRole @default(STAFF)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  reservationsCreated Reservation[] @relation("CreatedBy")
+  reservationsUpdated Reservation[] @relation("UpdatedBy")
+  menuItemsCreated    MenuItem[]    @relation("CreatedBy")
+  customerNotes       CustomerNote[]
+  
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER  
+  STAFF
+  KITCHEN
+}
+
+// Customer Management (CRM)
+model Customer {
+  id                    String    @id @default(cuid())
+  firstName             String
+  lastName              String
+  email                 String    @unique
+  phone                 String?
+  language              Language  @default(DE)
+  dateOfBirth           DateTime?
+  
+  // Preferences & Dietary Requirements
+  preferredTime         String?
+  preferredLocation     TableLocation?
+  dietaryRestrictions   String[]
+  allergies             String?
+  favoriteDisheIds      String[]
+  
+  // Privacy & GDPR
+  emailConsent          Boolean   @default(false)
+  smsConsent            Boolean   @default(false)
+  marketingConsent      Boolean   @default(false)
+  dataProcessingConsent Boolean   @default(true)
+  consentDate           DateTime?
+  
+  // Statistics
+  totalVisits           Int       @default(0)
+  totalSpent            Decimal   @default(0)
+  averagePartySize      Int       @default(2)
+  lastVisit             DateTime?
+  isVip                 Boolean   @default(false)
+  
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  // Relations
+  reservations          Reservation[]
+  notes                 CustomerNote[]
+  newsletterSubscription NewsletterSubscription?
+  
+  @@map("customers")
+}
+
+model CustomerNote {
+  id         String   @id @default(cuid())
+  customerId String
+  userId     String
+  note       String
+  isImportant Boolean @default(false)
+  createdAt  DateTime @default(now())
+  
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+  
+  @@map("customer_notes")
+}
+
+// Table Management
+model Table {
+  id           String        @id @default(cuid())
+  number       Int           @unique
+  capacity     Int
+  location     TableLocation
+  isActive     Boolean       @default(true)
+  description  String?
+  
+  // Visual layout properties
+  xPosition    Float?
+  yPosition    Float?
+  shape        TableShape    @default(RECTANGLE)
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  // Relations
+  reservations Reservation[]
+  qrCodes      QRCode[]
+  
+  @@map("tables")
+}
+
+enum TableLocation {
+  TERRACE_SEA_VIEW
+  TERRACE_STANDARD  
+  INDOOR_WINDOW
+  INDOOR_STANDARD
+  BAR_AREA
+}
+
+enum TableShape {
+  RECTANGLE
+  ROUND
+  SQUARE
+}
+
+// Reservation Management
+model Reservation {
+  id                String            @id @default(cuid())
+  customerId        String
+  tableId           String?
+  
+  // Reservation Details
+  dateTime          DateTime
+  partySize         Int
+  duration          Int               @default(120) // minutes
+  status            ReservationStatus @default(PENDING)
+  
+  // Customer Preferences
+  specialRequests   String?
+  occasion          String?           // birthday, anniversary, business
+  dietaryNotes      String?
+  
+  // Internal Management
+  isConfirmed       Boolean           @default(false)
+  confirmationSentAt DateTime?
+  reminderSentAt    DateTime?
+  checkedInAt       DateTime?
+  completedAt       DateTime?
+  cancelledAt       DateTime?
+  cancellationReason String?
+  
+  // Metadata
+  source            ReservationSource @default(WEBSITE)
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  createdById       String
+  updatedById       String?
+  
+  // Relations
+  customer          Customer          @relation(fields: [customerId], references: [id])
+  table             Table?            @relation(fields: [tableId], references: [id])
+  createdBy         User              @relation("CreatedBy", fields: [createdById], references: [id])
+  updatedBy         User?             @relation("UpdatedBy", fields: [updatedById], references: [id])
+  
+  @@map("reservations")
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  SEATED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum ReservationSource {
+  WEBSITE
+  PHONE
+  WALK_IN
+  SOCIAL_MEDIA
+}
+
+// Menu Management
+model MenuCategory {
+  id                String     @id @default(cuid())
+  name              String
+  nameEn            String?
+  description       String?
+  descriptionEn     String?
+  displayOrder      Int        @default(0)
+  isActive          Boolean    @default(true)
+  icon              String?
+  
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  
+  // Relations
+  menuItems         MenuItem[]
+  
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id                String       @id @default(cuid())
+  categoryId        String
+  
+  // Basic Info
+  name              String
+  nameEn            String?
+  description       String
+  descriptionEn     String?
+  price             Decimal      @db.Decimal(10,2)
+  
+  // Availability & Status
+  isAvailable       Boolean      @default(true)
+  isSignature       Boolean      @default(false) // Chef's recommendation
+  isNew             Boolean      @default(false)
+  isSeasonalSpecial Boolean      @default(false)
+  availableFrom     DateTime?
+  availableTo       DateTime?
+  
+  // Dietary Information (EU 14 Allergens)
+  containsGluten    Boolean      @default(false)
+  containsMilk      Boolean      @default(false)
+  containsEggs      Boolean      @default(false)
+  containsNuts      Boolean      @default(false)
+  containsFish      Boolean      @default(false)
+  containsShellfish Boolean      @default(false)
+  containsSoy       Boolean      @default(false)
+  containsCelery    Boolean      @default(false)
+  containsMustard   Boolean      @default(false)
+  containsSesame    Boolean      @default(false)
+  containsSulfites  Boolean      @default(false)
+  containsLupin     Boolean      @default(false)
+  containsMollusks  Boolean      @default(false)
+  containsPeanuts   Boolean      @default(false)
+  
+  // Dietary Labels
+  isVegetarian      Boolean      @default(false)
+  isVegan           Boolean      @default(false)
+  isGlutenFree      Boolean      @default(false)
+  isLactoseFree     Boolean      @default(false)
+  
+  // Display & Ordering
+  displayOrder      Int          @default(0)
+  images            String[]     // URLs to images
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  createdById       String
+  
+  // Relations
+  category          MenuCategory @relation(fields: [categoryId], references: [id])
+  createdBy         User         @relation("CreatedBy", fields: [createdById], references: [id])
+  
+  @@map("menu_items")
+}
+
+// QR Code System
+model QRCode {
+  id            String    @id @default(cuid())
+  tableId       String
+  code          String    @unique
+  isActive      Boolean   @default(true)
+  scansCount    Int       @default(0)
+  lastScannedAt DateTime?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  table         Table     @relation(fields: [tableId], references: [id])
+  scanEvents    QRScanEvent[]
+  
+  @@map("qr_codes")
+}
+
+model QRScanEvent {
+  id        String   @id @default(cuid())
+  qrCodeId  String
+  ipAddress String?
+  userAgent String?
+  scannedAt DateTime @default(now())
+  
+  qrCode    QRCode   @relation(fields: [qrCodeId], references: [id])
+  
+  @@map("qr_scan_events")
+}
+
+// Content Management
+model PageContent {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  titleEn     String?
+  content     String   // Rich text content
+  contentEn   String?
+  metaTitle   String?
+  metaDescription String?
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("page_content")
+}
+
+model GalleryImage {
+  id          String        @id @default(cuid())
+  title       String
+  titleEn     String?
+  description String?
+  descriptionEn String?
+  imageUrl    String
+  category    GalleryCategory
+  isActive    Boolean       @default(true)
+  displayOrder Int          @default(0)
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  @@map("gallery_images")
+}
+
+enum GalleryCategory {
+  RESTAURANT
+  FOOD
+  TEAM
+  EVENTS
+  AMBIENCE
+}
+
+// Newsletter & Marketing
+model NewsletterSubscription {
+  id            String    @id @default(cuid())
+  customerId    String    @unique
+  isActive      Boolean   @default(true)
+  subscribedAt  DateTime  @default(now())
+  unsubscribedAt DateTime?
+  
+  customer      Customer  @relation(fields: [customerId], references: [id])
+  
+  @@map("newsletter_subscriptions")
+}
+
+// Analytics & Reporting
+model AnalyticsEvent {
+  id          String             @id @default(cuid())
+  eventType   AnalyticsEventType
+  eventData   Json               // Flexible JSON data
+  sessionId   String?
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime           @default(now())
+  
+  @@map("analytics_events")
+}
+
+enum AnalyticsEventType {
+  PAGE_VIEW
+  RESERVATION_STARTED
+  RESERVATION_COMPLETED
+  MENU_VIEWED
+  QR_CODE_SCANNED
+  EMAIL_OPENED
+  PHONE_CLICKED
+}
+
+// System Settings
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+  
+  @@map("system_settings")
+}
+
+enum Language {
+  DE
+  EN
+}
