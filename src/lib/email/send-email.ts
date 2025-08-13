@@ -1,7 +1,21 @@
 import { Resend } from 'resend'
 import { renderAsync } from '@react-email/components'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy initialization to prevent build-time instantiation
+let resendClient: Resend | null = null
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      // For development/demo mode - email functionality disabled
+      console.warn('RESEND_API_KEY not configured - email sending disabled')
+      throw new Error('Email service not configured. Please set RESEND_API_KEY environment variable.')
+    }
+    resendClient = new Resend(apiKey)
+  }
+  return resendClient
+}
 
 export interface SendEmailOptions {
   to: string | string[]
@@ -28,7 +42,7 @@ export async function sendEmail({
     // Render the React Email template to HTML
     const html = await renderAsync(template)
 
-    const result = await resend.emails.send({
+    const result = await getResendClient().emails.send({
       from,
       to: Array.isArray(to) ? to : [to],
       subject,
@@ -170,13 +184,9 @@ export async function sendStaffInvitation(
 
 // Utility function to validate email configuration
 export async function validateEmailConfiguration() {
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error('RESEND_API_KEY environment variable is not set')
-  }
-
   try {
     // Test the API key by attempting to get domain information
-    const result = await resend.domains.list()
+    const result = await getResendClient().domains.list()
     return { valid: true, domains: result.data }
   } catch (error) {
     console.error('Email configuration validation failed:', error)
