@@ -6,10 +6,12 @@ Dieser Guide führt Sie durch den kompletten Deployment-Prozess der Badezeit-Web
 
 ### Ziel-Architektur
 - **Frontend**: Vercel (Next.js optimiert)
-- **Datenbank**: Supabase PostgreSQL
+- **Datenbank**: Supabase PostgreSQL mit Sample-Daten
 - **CDN**: ImageKit.io für Bilder
 - **E-Mail**: Resend für Transaktions-E-Mails
 - **Authentifizierung**: Clerk
+- **Export-System**: Client-seitige PDF/Excel-Generierung
+- **State Management**: TanStack Query für optimierte Performance
 - **Monitoring**: Vercel Analytics + Error Tracking
 
 ## 🚀 Vercel Deployment
@@ -47,6 +49,12 @@ vercel env add NEXT_PUBLIC_CLERK_SIGN_UP_URL production
 # E-Mail (Resend)
 vercel env add RESEND_API_KEY production
 vercel env add RESEND_FROM_EMAIL production
+
+# **NEU: Export-System**
+vercel env add NEXT_PUBLIC_ENABLE_EXPORT production
+# Eingabe: true
+vercel env add NEXT_PUBLIC_MAX_EXPORT_ROWS production
+# Eingabe: 10000
 
 # ImageKit CDN
 vercel env add NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT production
@@ -123,14 +131,28 @@ CREATE POLICY "Staff can view all reservations" ON reservations
 DATABASE_URL="postgresql://postgres.abcdefg:password@db.supabase.co:5432/postgres"
 ```
 
-### 4. Schema migrieren
+### 4. Schema migrieren und Sample-Daten laden
 
 ```bash
 # Lokale Prisma-Migration auf Supabase anwenden
 npx prisma db push
 
+# **NEU: Sample-Daten für Admin Panel laden**
+npx prisma db seed
+# Lädt 5 Kategorien, 10 Menüitems mit Allergenen
+
 # Oder über Migration Files
 npx prisma migrate deploy
+```
+
+### 5. Datenbank-Status prüfen
+
+```bash
+# Prisma Studio für Dateninspektion
+npx prisma studio
+
+# Verbindung testen
+npx prisma db pull
 ```
 
 ## 📧 Resend Email Setup

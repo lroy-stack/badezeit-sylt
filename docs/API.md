@@ -1,6 +1,40 @@
 # API Dokumentation - Strandrestaurant Badezeit
 
-Diese Dokumentation beschreibt die Server Actions und API-Endpunkte des Badezeit-Systems.
+Diese Dokumentation beschreibt die Server Actions und API-Endpunkte des Badezeit-Systems, einschließlich der neuen Admin Panel APIs für Speisekarten-Management und Analytics-Export.
+
+## 🆕 Neue Admin Panel APIs
+
+### Menu Management APIs
+
+#### Kategorien API
+- `GET /api/menu-categories` - Alle Kategorien abrufen
+- `POST /api/menu-categories` - Neue Kategorie erstellen
+- `PUT /api/menu-categories/[id]` - Kategorie aktualisieren
+- `DELETE /api/menu-categories/[id]` - Kategorie löschen
+
+#### Menüitems API
+- `GET /api/menu-items` - Alle Menüitems abrufen
+- `POST /api/menu-items` - Neues Menüitem erstellen
+- `PUT /api/menu-items/[id]` - Menüitem aktualisieren
+- `DELETE /api/menu-items/[id]` - Menüitem löschen
+
+#### Allergene API
+- `GET /api/allergens` - Alle Allergene abrufen
+- `POST /api/allergens` - Neues Allergen erstellen
+- `PUT /api/allergens/[id]` - Allergen aktualisieren
+- `DELETE /api/allergens/[id]` - Allergen löschen
+
+#### Gallery API
+- `GET /api/gallery-images` - Galerie-Bilder abrufen
+- `POST /api/gallery-images` - Neues Bild hochladen
+
+#### Settings API
+- `GET /api/menu-settings` - Menü-Einstellungen abrufen
+- `PUT /api/menu-settings` - Menü-Einstellungen aktualisieren
+
+### Analytics APIs
+- `GET /api/analytics/daily-data` - Tägliche Analytics-Daten
+- `GET /api/analytics/summary` - Zusammenfassung der Kennzahlen
 
 ## 🔧 Server Actions
 

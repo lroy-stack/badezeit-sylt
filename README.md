@@ -36,7 +36,9 @@ Dies ist die **offizielle Website** des **Strandrestaurant Badezeit** - einem au
 - **ORM**: Prisma 6.14.0
 - **Authentifizierung**: Clerk (Development-Modus bei fehlenden Keys)
 - **Email**: React Email mit Resend Integration
-- **Formulare**: Server Actions mit Zod-Validierung
+- **Formulare**: React Hook Form mit Server Actions und Zod-Validierung
+- **Export**: jsPDF (PDF-Generation) + XLSX (Excel-Export)
+- **State Management**: TanStack Query für Server-State
 
 ### Deployment & Hosting
 - **Plattform**: Vercel (Next.js optimiert)
@@ -123,9 +125,20 @@ npm run type-check   # TypeScript Typprüfung
 ```bash
 npm run db:generate  # Prisma Client generieren
 npm run db:push      # Schema-Änderungen in DB übertragen
-npm run db:seed      # Datenbank mit Beispieldaten füllen
+npm run db:seed      # Datenbank mit Beispieldaten füllen (inkl. 5 Kategorien, 10 Menüitems)
 npm run db:studio    # Prisma Studio öffnen
 npm run db:reset     # Datenbank zurücksetzen und neu seeden
+```
+
+### Neue Features Testen
+```bash
+# Admin Panel Funktionen
+# 1. Starte Entwicklungsserver
+npm run dev
+
+# 2. Navigiere zu /dashboard/speisekarte für Menümanagement
+# 3. Navigiere zu /dashboard/analytics für Export-Funktionen
+# 4. Teste alle Tab-Navigationen im Speisekarte-Bereich
 ```
 
 ## 📁 Projektstruktur
@@ -148,7 +161,7 @@ badezeit-sylt/
 │   │   │   ├── gallery/       # Galerie API
 │   │   │   ├── settings/      # System-Einstellungen
 │   │   │   └── dashboard/     # Dashboard-Metriken
-│   │   ├── dashboard/         # Admin-Panel
+│   │   ├── dashboard/         # Admin-Panel (Vollständig implementiert)
 │   │   │   ├── layout.tsx     # Dashboard Layout mit Navigation
 │   │   │   ├── page.tsx       # Dashboard-Übersicht
 │   │   │   ├── reservierungen/ # Reservierungsmanagement
@@ -156,10 +169,23 @@ badezeit-sylt/
 │   │   │   │   ├── neu/       # Neue Reservierung
 │   │   │   │   ├── [id]/      # Reservierungsdetails
 │   │   │   │   └── components/ # Reservierungs-Komponenten
-│   │   │   └── kunden/        # Kundenverwaltung (CRM)
-│   │   │       ├── page.tsx   # Kundenliste
-│   │   │       ├── [id]/      # Kundendetails
-│   │   │       └── components/ # Kunden-Komponenten
+│   │   │   ├── kunden/        # Kundenverwaltung (CRM)
+│   │   │   │   ├── page.tsx   # Kundenliste
+│   │   │   │   ├── [id]/      # Kundendetails
+│   │   │   │   └── components/ # Kunden-Komponenten
+│   │   │   ├── speisekarte/   # **NEU: Vollständiges Menümanagement**
+│   │   │   │   ├── page.tsx   # Haupt-Menüseite mit Tab-Navigation
+│   │   │   │   └── components/
+│   │   │   │       ├── tabs-navigation.tsx    # Tab-Navigation
+│   │   │   │       ├── category-manager.tsx   # Kategorienverwaltung
+│   │   │   │       ├── item-manager.tsx       # Gerichteverwaltung
+│   │   │   │       ├── allergen-manager.tsx   # **NEU: EU-14 Allergenmanagement**
+│   │   │   │       ├── photo-manager.tsx      # **NEU: Bilderverwaltung**
+│   │   │   │       └── menu-settings-manager.tsx # **NEU: 6-Tab Einstellungen**
+│   │   │   └── analytics/     # **NEU: Analytics mit Export**
+│   │   │       ├── page.tsx   # Analytics Dashboard
+│   │   │       └── components/
+│   │   │           └── export-manager.tsx     # **NEU: PDF/Excel Export**
 │   │   ├── globals.css        # Globale Styles & Design System
 │   │   ├── layout.tsx         # Root Layout
 │   │   ├── page.tsx           # Homepage
@@ -174,7 +200,8 @@ badezeit-sylt/
 │   │   │   ├── form.tsx       # Formular-Komponenten
 │   │   │   ├── dialog.tsx     # Modal-Dialoge
 │   │   │   ├── table.tsx      # Tabellen-Komponente
-│   │   │   └── lightbox.tsx   # Bildergalerie Lightbox
+│   │   │   ├── lightbox.tsx   # Bildergalerie Lightbox
+│   │   │   └── switch.tsx     # **NEU: Radix UI Switch-Komponente**
 │   │   ├── layout/            # Layout-Komponenten
 │   │   │   ├── header.tsx     # Website-Header
 │   │   │   ├── footer.tsx     # Website-Footer
@@ -288,27 +315,41 @@ Das umfassende Restaurantmanagement-System bietet folgende Module:
 - **Verfügbarkeitsstatus**: Aktiv/Inaktiv, Wartungsmodus
 
 ### 🍽️ Speisekartenmanagement
-- **Kategorien**: Hierarchische Organisation der Gerichte
+**Vollständig implementiertes Admin-System mit:**
+- **Tab-basierte Navigation**: 5 Hauptbereiche (Gerichte, Kategorien, Allergene, Bilder, Einstellungen)
+- **Kategoriemanagement**: CRUD-Operationen mit hierarchischer Struktur
+- **Gerichteverwaltung**: Vollständige Menüitemverwaltung mit Preisen und Beschreibungen
+- **EU-14 Allergen-Compliance**: Vollständige Allergenkennzeichnung (Gluten, Milch, Eier, Nüsse, Fisch, Schalentiere, Soja, Sellerie, Senf, Sesam, Sulfite, Lupinen, Weichtiere, Erdnüsse)
+- **Fotomanagement**: Direkte Integration mit gallery_images Tabelle
+- **Menü-Einstellungen**: 6 Konfigurationsbereiche (Anzeige, Preise, Sprache, Layout, Öffentlich, System)
+- **Echtzeit-Datenbankintegration**: Live-Verbindung zu Supabase PostgreSQL
+- **Formular-Validierung**: React Hook Form mit Zod-Schemas
 - **Mehrsprachigkeit**: Deutsch (primär) und Englisch
-- **Allergen-Management**: EU-konforme 14 Allergenkennzeichnung
-- **Diät-Labels**: Vegetarisch, Vegan, Glutenfrei, Laktosefrei
-- **Verfügbarkeitszeiträume**: Saisonale und zeitlich begrenzte Angebote
-- **Preismanagement**: Flexible Preisgestaltung
-- **Bildintegration**: Multiple Produktbilder pro Gericht
+- **Beispieldaten**: 5 Kategorien und 10 Menüitems bereits eingepflegt
 
 ### 📈 Analytics & Berichte
-- **Dashboard-Metriken**: Reservierungsstatistiken, Umsätze, Trends
+**Vollständig implementiertes Analytics-System:**
+- **Dashboard-Metriken**: Live-Reservierungsstatistiken, Umsätze, Trends
+- **Export-Manager**: PDF- und Excel-Export mit professioneller Formatierung
+- **PDF-Generation**: jsPDF mit AutoTable für strukturierte Reports
+- **Excel-Export**: XLSX (SheetJS) mit mehreren Arbeitsblättern
+- **Umfassende Berichte**: Zusammenfassung, Tageswerte, Leistungskennzahlen
+- **Konfigurierbare Exports**: Anpassbare Inhalte und Zeiträume
+- **Performance-Analyse**: RevPASH, Auslastung, Durchschnittswerte
+- **Deutsche Formatierung**: Korrekte Datums- und Währungsformate
 - **Kundensegmentierung**: VIP-Kunden, Stammkunden, Neukunden
-- **Tischauslastung**: Optimierung der Tischnutzung
-- **Saisonale Trends**: Analyse von Buchungsmustern
 - **GDPR-konforme Auswertungen**: Anonymisierte Datenanalyse
 
 ### ⚙️ Systemeinstellungen
-- **Betriebszeiten**: Flexible Öffnungszeiten-Konfiguration
-- **Reservierungsregeln**: Vorlaufzeiten, maximale Gruppengröße
+**Vollständig funktionale Einstellungsverwaltung:**
+- **Betriebszeiten**: Flexible Öffnungszeiten-Konfiguration mit Formularvalidierung
+- **Reservierungsregeln**: Vorlaufzeiten, maximale Gruppengröße mit React Hook Form
 - **E-Mail-Templates**: Anpassbare Kommunikationsvorlagen
-- **Systemparameter**: Zeitzone, Sprache, Währung
-- **Benutzerrollen**: ADMIN, MANAGER, STAFF, KITCHEN
+- **Systemparameter**: Zeitzone, Sprache, Währung mit Echtzeit-Updates
+- **Benutzerrollen**: ADMIN, MANAGER, STAFF, KITCHEN mit granularen Berechtigungen
+- **TanStack Query Integration**: Optimierte Datenabfragen und Cache-Management
+- **Validierung**: Zod-Schemas für alle Einstellungsformulare
+- **Sofortiges Feedback**: Toast-Benachrichtigungen für Aktionen
 
 ### 🔒 Sicherheit & Compliance
 - **Rollenbasierte Zugriffskontrolle**: Granulare Berechtigungen
@@ -319,30 +360,55 @@ Das umfassende Restaurantmanagement-System bietet folgende Module:
 
 ## 🔧 Technische Details
 
-### Client Components vs Server Components
-Das Projekt nutzt Next.js 13+ App Router mit einer strategischen Mischung aus:
+### Neue Admin Panel Architektur
+**Vollständig implementierte Features:**
+- **Tab-basierte Navigation**: Moderne UX mit 5 Hauptbereichen
+- **Form Management**: React Hook Form mit Zod-Validierung für alle Formulare
+- **State Management**: TanStack Query für optimierte Server-State-Verwaltung
+- **Export-System**: jsPDF + XLSX für professionelle Berichte
+- **Real-time Updates**: Live-Datenbankverbindung zu Supabase
+- **Component Library**: Radix UI Primitives mit custom Styling
 
-- **Server Components**: Standard für bessere Performance
-- **Client Components**: Für interaktive Features (markiert mit 'use client')
+### Client Components vs Server Components
+Das Projekt nutzt Next.js 15 App Router mit strategischer Komponentenverteilung:
+
+- **Server Components**: Standard für Performance (Dashboard-Seiten, APIs)
+- **Client Components**: Interaktive Features (alle Admin-Formulare, Export-Manager)
+- **Neue Client Components**: Switch, TabsNavigation, AllergenManager, PhotoManager, MenuSettingsManager, ExportManager
 
 ### Authentifizierung
 - **Clerk Integration**: Vollständiges Auth-System
 - **Development Mode**: Automatisch deaktiviert bei fehlenden Keys
 - **Rollenbasiert**: ADMIN, MANAGER, STAFF, KITCHEN
+- **Route Protection**: Middleware für Admin-Panel-Zugang
 
 ### Formular-Handling
+- **React Hook Form**: Performante Formularverarbeitung mit Validierung
+- **Zod Schemas**: Typsichere Laufzeit-Validierung für alle Formulare
 - **Server Actions**: Sichere serverseitige Verarbeitung
-- **Zod Validation**: Typsichere Formularvalidierung
+- **Toast Feedback**: Sofortiges Benutzer-Feedback mit Sonner
 - **GDPR-konform**: Einverständniserklärungen für alle Formulare
 
-### Datenbankschema
-Das Prisma-Schema umfasst:
-- Benutzerverwaltung mit Rollen
-- Kundenverwaltung (CRM)
-- Tisch- und Reservierungsmanagement
-- Menü- und Inhaltsverwaltung
-- QR-Code-System
-- Analytics und GDPR-Compliance
+### Export-System
+**PDF-Generation (jsPDF):**
+- Professionelle Dokumentenerstellung mit AutoTable
+- Deutsche Formatierung für Datum und Währung
+- Multi-Page-Support mit automatischem Umbruch
+- Tabellen mit Styling und korrekter Ausrichtung
+
+**Excel-Export (XLSX):**
+- Multi-Sheet-Arbeitsmappen
+- Automatische Spaltenbreitenoptimierung
+- Formatierte Zahlen und Datumswerte
+- Strukturierte Datenorganisation
+
+### Datenbankintegration
+Das vollständig integrierte Prisma-Schema umfasst:
+- **Menüdaten**: 5 Beispielkategorien, 10 Menüitems mit Allergenen
+- **Gallery-Integration**: Direkte Verbindung zu gallery_images
+- **Allergen-Compliance**: EU-14 Allergenstandard vollständig implementiert
+- **Settings-Management**: Persistente Konfigurationen
+- **GDPR-Compliance**: Einverständniserklärungen und Audit-Logs
 
 ## 🔒 Sicherheit & Datenschutz
 
@@ -394,13 +460,21 @@ Stellen Sie sicher, dass alle erforderlichen Umgebungsvariablen in Vercel gesetz
 ### Häufige Aufgaben
 1. **Restaurant-Informationen aktualisieren**: `/src/app/ueber-uns/page.tsx`
 2. **Kontaktdaten ändern**: `/src/app/kontakt/page.tsx`
-3. **Speisekarte aktualisieren**: Admin-Dashboard oder Datenbankzugriff
-4. **Bilder hinzufügen**: ImageKit CDN + Galerie-Management
+3. **Speisekarte aktualisieren**: `/dashboard/speisekarte` - Vollständiges Admin-Interface
+4. **Allergene verwalten**: `/dashboard/speisekarte` (Allergene-Tab)
+5. **Menübilder verwalten**: `/dashboard/speisekarte` (Bilder-Tab)
+6. **Analytics exportieren**: `/dashboard/analytics` (Export-Manager)
+7. **Menüeinstellungen ändern**: `/dashboard/speisekarte` (Einstellungen-Tab)
+8. **Bilder hinzufügen**: ImageKit CDN + Galerie-Management
 
 ### Troubleshooting
 - **Build-Fehler**: Typprüfung mit `npm run type-check`
 - **Datenbank-Probleme**: Prisma Studio mit `npm run db:studio`
 - **Auth-Probleme**: Clerk-Konfiguration prüfen
+- **Export-Probleme**: Browser-Konsole prüfen, jsPDF/XLSX Kompatibilität
+- **Formular-Validierung**: Zod-Schema-Fehler in Browser-Konsole
+- **Switch-Komponente fehlt**: `npm install @radix-ui/react-switch`
+- **Seeding-Fehler**: `npm run db:reset` für kompletten Neustart
 
 ## 📝 Lizenz
 

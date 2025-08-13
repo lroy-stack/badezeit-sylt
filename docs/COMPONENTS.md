@@ -13,6 +13,9 @@ Das Badezeit Design System basiert auf **shadcn/ui** und Tailwind CSS und folgt 
 - **Responsive**: Mobile-first Ansatz
 - **Themeable**: Unterstützung für Dark/Light Mode
 - **Performant**: Optimiert für Core Web Vitals
+- **Form Management**: React Hook Form Integration mit Zod Validation
+- **State Management**: TanStack Query für Server State
+- **Export Funktionalität**: PDF/Excel Generation mit deutschen Formatierungen
 
 ### Komponentenhierarchie
 
@@ -23,6 +26,10 @@ src/components/
 │   ├── input.tsx
 │   ├── card.tsx
 │   ├── dialog.tsx
+│   ├── switch.tsx       # **NEU: Radix UI Switch Component**
+│   ├── tabs.tsx
+│   ├── select.tsx
+│   ├── badge.tsx
 │   └── ...
 ├── layout/              # Layout-Komponenten
 │   ├── header.tsx
@@ -32,7 +39,13 @@ src/components/
 └── features/            # Feature-spezifische Komponenten
     ├── reservation/
     ├── menu/
-    └── contact/
+    ├── contact/
+    └── admin/           # **NEU: Admin Panel Komponenten**
+        ├── tabs-navigation.tsx
+        ├── allergen-manager.tsx
+        ├── photo-manager.tsx
+        ├── menu-settings-manager.tsx
+        └── export-manager.tsx
 ```
 
 ## 🎨 UI-Komponenten (shadcn/ui)
@@ -976,6 +989,258 @@ npm run chromatic
 4. **Accessibility Testing**
 5. **Performance Monitoring**
 
+## 🛠️ Neue Admin Panel Komponenten
+
+### TabsNavigation Component
+
+**Datei**: `/src/app/dashboard/speisekarte/components/tabs-navigation.tsx`
+
+#### Beschreibung
+Tab-basierte Navigation für das Menümanagement mit 5 Hauptbereichen.
+
+```tsx
+interface TabsNavigationProps {
+  activeTab: string
+  onTabChange: (tab: string) => void
+}
+
+export function TabsNavigation({ activeTab, onTabChange }: TabsNavigationProps) {
+  const tabs = [
+    { id: 'gerichte', label: 'Gerichte', icon: UtensilsCrossed },
+    { id: 'kategorien', label: 'Kategorien', icon: FolderOpen },
+    { id: 'allergene', label: 'Allergene', icon: AlertTriangle },
+    { id: 'bilder', label: 'Bilder', icon: Image },
+    { id: 'einstellungen', label: 'Einstellungen', icon: Settings }
+  ]
+  
+  return (
+    <Tabs value={activeTab} onValueChange={onTabChange}>
+      <TabsList className="grid w-full grid-cols-5">
+        {tabs.map(tab => (
+          <TabsTrigger key={tab.id} value={tab.id}>
+            <tab.icon className="h-4 w-4 mr-2" />
+            {tab.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
+  )
+}
+```
+
+### Switch Component (NEU)
+
+**Datei**: `/src/components/ui/switch.tsx`
+
+#### Beschreibung
+Radix UI Switch-Komponente für Ein/Aus-Schalter in Admin-Formularen.
+
+```tsx
+import { Switch } from '@/components/ui/switch'
+
+// Basis Switch
+<Switch 
+  checked={isEnabled}
+  onCheckedChange={setIsEnabled}
+/>
+
+// Mit Label
+<div className="flex items-center space-x-2">
+  <Switch id="airplane-mode" />
+  <Label htmlFor="airplane-mode">Flugmodus</Label>
+</div>
+
+// In Formularen mit React Hook Form
+const { control } = useForm()
+
+<Controller
+  name="isActive"
+  control={control}
+  render={({ field }) => (
+    <div className="flex items-center space-x-2">
+      <Switch
+        checked={field.value}
+        onCheckedChange={field.onChange}
+      />
+      <Label>Aktiv</Label>
+    </div>
+  )}
+/>
+```
+
+### AllergenManager Component
+
+**Datei**: `/src/app/dashboard/speisekarte/components/allergen-manager.tsx`
+
+#### Beschreibung
+Vollständiges EU-14 Allergenmanagement mit CRUD-Operationen.
+
+#### Features
+- **EU-14 Allergene**: Gluten, Milch, Eier, Nüsse, Fisch, etc.
+- **CRUD-Operationen**: Anlegen, Bearbeiten, Löschen
+- **Form Validation**: Zod-Schemas für Validierung
+- **Database Integration**: Live-Verbindung zu Supabase
+
+### ExportManager Component
+
+**Datei**: `/src/app/dashboard/analytics/components/export-manager.tsx`
+
+#### Beschreibung
+Professioneller PDF- und Excel-Export für Analytics-Berichte.
+
+#### Features
+- **PDF Generation**: jsPDF mit AutoTable für strukturierte Dokumente
+- **Excel Export**: XLSX mit Multi-Sheet-Arbeitsmappen
+- **Deutsche Formatierung**: Korrekte Datums- und Währungsformate
+- **Konfigurierbare Exports**: Anpassbare Inhalte und Zeiträume
+
+```tsx
+const generatePDF = async () => {
+  const { jsPDF } = await import('jspdf')
+  await import('jspdf-autotable')
+  
+  const doc = new jsPDF()
+  
+  // Header mit deutscher Formatierung
+  doc.text('Badezeit Sylt - Analytics Report', 20, 20)
+  doc.text(
+    `Generiert am: ${format(new Date(), 'dd.MM.yyyy HH:mm', { locale: de })}`,
+    20, 30
+  )
+  
+  // Tabellen mit AutoTable
+  ;(doc as any).autoTable({
+    head: [['Kennzahl', 'Wert']],
+    body: [
+      ['Gesamtumsatz', `${totalRevenue.toLocaleString('de-DE', { 
+        style: 'currency', 
+        currency: 'EUR' 
+      })}`],
+      ['Reservierungen gesamt', totalReservations.toString()],
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [59, 130, 246] }
+  })
+  
+  doc.save(`badezeit-analytics-${format(new Date(), 'yyyy-MM-dd')}.pdf`)
+}
+```
+
+## 🔗 Form Management Patterns
+
+### React Hook Form Integration
+
+```tsx
+// Zod Schema Definition
+const menuItemSchema = z.object({
+  name: z.string().min(1, 'Name ist erforderlich'),
+  price: z.number().min(0, 'Preis muss positiv sein'),
+  description: z.string().optional(),
+  allergens: z.array(z.string()),
+  isActive: z.boolean()
+})
+
+type MenuItemFormData = z.infer<typeof menuItemSchema>
+
+// Form Component mit Switch Integration
+function MenuItemForm({ item, onSubmit }: MenuItemFormProps) {
+  const form = useForm<MenuItemFormData>({
+    resolver: zodResolver(menuItemSchema),
+    defaultValues: item || {
+      name: '',
+      price: 0,
+      description: '',
+      allergens: [],
+      isActive: true
+    }
+  })
+  
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <FormField
+          control={form.control}
+          name="isActive"
+          render={({ field }) => (
+            <FormItem className="flex items-center space-x-2">
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel>Aktiv</FormLabel>
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Speichern</Button>
+      </form>
+    </Form>
+  )
+}
+```
+
+### TanStack Query Integration
+
+```tsx
+// Query Hook für Menüitems
+function useMenuItems() {
+  return useQuery({
+    queryKey: ['menu-items'],
+    queryFn: async () => {
+      const response = await fetch('/api/menu-items')
+      if (!response.ok) throw new Error('Failed to fetch menu items')
+      return response.json()
+    }
+  })
+}
+
+// Mutation Hook mit Toast Feedback
+function useCreateMenuItem() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (data: MenuItemFormData) => {
+      const response = await fetch('/api/menu-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      if (!response.ok) throw new Error('Failed to create menu item')
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['menu-items'] })
+      toast.success('Menüitem erfolgreich erstellt')
+    },
+    onError: (error) => {
+      toast.error('Fehler beim Erstellen des Menüitems')
+      console.error(error)
+    }
+  })
+}
+```
+
+## 🚀 Performance Optimierungen
+
+### Dynamic Imports für Export-Features
+
+```typescript
+// Lazy Loading für bessere Bundle-Größe
+const generatePDF = async () => {
+  // jsPDF nur laden wenn benötigt
+  const { jsPDF } = await import('jspdf')
+  await import('jspdf-autotable')
+  // ...
+}
+
+const generateExcel = async () => {
+  // XLSX nur laden wenn benötigt
+  const XLSX = await import('xlsx')
+  // ...
+}
+```
+
 ---
 
-Diese Komponenten-Dokumentation sollte regelmäßig aktualisiert werden, wenn neue Komponenten hinzugefügt oder bestehende geändert werden.
+Diese Komponenten-Dokumentation wurde vollständig aktualisiert und spiegelt den aktuellen Stand des implementierten Admin-Panels wider. Alle neuen Komponenten sind produktionsbereit und vollständig in das bestehende System integriert.

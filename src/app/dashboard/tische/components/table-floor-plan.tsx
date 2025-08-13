@@ -50,6 +50,29 @@ export function TableFloorPlan({ tables }: TableFloorPlanProps) {
   const [hasChanges, setHasChanges] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [zoom, setZoom] = useState(100)
+
+  // Grid layout containment styles - applied locally to avoid global conflicts
+  const gridContainmentStyles = `
+    .react-grid-layout {
+      position: relative !important;
+      overflow: hidden !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+    }
+    .react-grid-item {
+      min-width: 0 !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
+    .react-grid-item > * {
+      min-width: 0 !important;
+      min-height: 0 !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
+      overflow: hidden !important;
+    }
+  `
   
 
   // Filter tables by location
@@ -139,6 +162,7 @@ export function TableFloorPlan({ tables }: TableFloorPlanProps) {
     toast.info('Layout zurückgesetzt')
   }
 
+
   const locationOptions = [
     { value: 'ALL', label: 'Alle Bereiche' },
     { value: 'TERRACE_SEA_VIEW', label: 'Terrasse Meerblick' },
@@ -227,7 +251,11 @@ export function TableFloorPlan({ tables }: TableFloorPlanProps) {
 
 
   return (
-    <Card>
+    <>
+      {/* Local CSS for grid containment - prevents global style conflicts */}
+      <style dangerouslySetInnerHTML={{ __html: gridContainmentStyles }} />
+      
+      <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -268,6 +296,7 @@ export function TableFloorPlan({ tables }: TableFloorPlanProps) {
               </Button>
             </div>
             
+            
             {hasChanges && (
               <>
                 <Button variant="outline" size="sm" onClick={resetLayout}>
@@ -292,30 +321,32 @@ export function TableFloorPlan({ tables }: TableFloorPlanProps) {
           </div>
         )}
 
-        <div className="border rounded-lg bg-gray-50 p-4 min-h-[500px]" style={{ height: '600px', overflow: 'auto' }}>
+        <div className="border rounded-lg bg-gray-50 p-4 min-h-[500px] relative overflow-hidden" style={{ height: '600px' }}>
           {filteredTables.length > 0 ? (
-            <ResponsiveGridLayout
-              className="layout"
-              layouts={{ lg: layout }}
-              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-              cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-              rowHeight={60}
-              margin={[10, 10]}
-              onLayoutChange={handleLayoutChange}
-              onDragStart={() => setIsDragging(true)}
-              onDragStop={() => setIsDragging(false)}
-              isDraggable={true}
-              isResizable={false}
-              preventCollision={false}
-              compactType="vertical"
-              useCSSTransforms={true}
-            >
-              {filteredTables.map((table) => (
-                <div key={table.id}>
-                  <TableItem table={table} />
-                </div>
-              ))}
-            </ResponsiveGridLayout>
+              <ResponsiveGridLayout
+                className="layout"
+                layouts={{ lg: layout }}
+                breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+                cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+                rowHeight={60}
+                margin={[10, 10]}
+                onLayoutChange={handleLayoutChange}
+                onDragStart={() => setIsDragging(true)}
+                onDragStop={() => setIsDragging(false)}
+                isDraggable={true}
+                isResizable={false}
+                preventCollision={false}
+                compactType="vertical"
+                useCSSTransforms={true}
+                isBounded={true}
+                autoSize={true}
+              >
+                {filteredTables.map((table) => (
+                  <div key={table.id}>
+                    <TableItem table={table} />
+                  </div>
+                ))}
+              </ResponsiveGridLayout>
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
@@ -357,6 +388,7 @@ export function TableFloorPlan({ tables }: TableFloorPlanProps) {
         </div>
       </CardContent>
     </Card>
+    </>
   )
 }
 
