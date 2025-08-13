@@ -24,7 +24,7 @@ echo ""
 
 echo "🔧 Environment Variables Required:"
 echo "================================="
-echo "DATABASE_URL=\"postgresql://postgres:Cryptorevolution23@db.ayugwprhixtsfktxungq.supabase.co:5432/postgres\""
+echo "DATABASE_URL=\"[REDACTED_FOR_SECURITY]\""
 echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=\"pk_test_placeholder\""
 echo "CLERK_SECRET_KEY=\"sk_test_placeholder\""
 echo "NEXT_PUBLIC_CLERK_SIGN_IN_URL=\"/sign-in\""

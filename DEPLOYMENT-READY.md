@@ -20,7 +20,7 @@
 
 ### Database
 ```bash
-DATABASE_URL="postgresql://postgres:Cryptorevolution23@db.ayugwprhixtsfktxungq.supabase.co:5432/postgres"
+DATABASE_URL="[SET_IN_VERCEL_DASHBOARD]"
 ```
 
 ### Authentication (Development Mode)
