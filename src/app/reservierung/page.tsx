@@ -371,14 +371,14 @@ export default function ReservierungPage() {
                   {/* Time Selection */}
                   <div>
                     <Label>Uhrzeit auswählen</Label>
-                    <div className="grid grid-cols-4 gap-2 mt-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
                       {timeSlots.map((time) => (
                         <Button
                           key={time}
                           variant={selectedTime === time ? "default" : "outline"}
                           size="sm"
                           onClick={() => setSelectedTime(time)}
-                          className="text-sm"
+                          className="text-sm h-12 min-h-[48px] font-medium"
                         >
                           {time}
                         </Button>
@@ -537,13 +537,13 @@ export default function ReservierungPage() {
                               <Badge variant="outline" className="text-xs">Premium</Badge>
                             )}
                           </h3>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                             {tables.map((table: any) => (
                               <Button
                                 key={table.id}
                                 variant={selectedTable === table.id ? "default" : "outline"}
                                 onClick={() => setSelectedTable(table.id)}
-                                className="h-auto p-3 flex flex-col items-center gap-1"
+                                className="h-auto p-4 flex flex-col items-center gap-2 min-h-[56px]"
                               >
                                 <span className="font-medium">Tisch {table.number}</span>
                                 <span className="text-xs opacity-75">bis {table.capacity}</span>
@@ -598,7 +598,7 @@ export default function ReservierungPage() {
                 <CardContent>
                   <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                     {/* Personal Information */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="firstName">Vorname *</Label>
                         <Input

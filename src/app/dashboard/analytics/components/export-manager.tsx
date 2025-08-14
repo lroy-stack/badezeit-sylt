@@ -72,11 +72,11 @@ export function ExportManager({
   const generatePDF = async () => {
     try {
       // Dynamically import jsPDF to avoid SSR issues
-      const { jsPDF } = await import('jspdf')
+      const jsPDFModule = await import('jspdf')
       // Import autoTable
       await import('jspdf-autotable')
 
-      const doc = new jsPDF()
+      const doc = new jsPDFModule.default()
       const pageWidth = doc.internal.pageSize.width
       const margin = 20
       let yPosition = margin

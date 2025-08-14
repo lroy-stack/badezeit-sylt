@@ -37,9 +37,9 @@ import { GALLERY_CATEGORIES } from '@/lib/validations/gallery'
 import { cn } from "@/lib/utils"
 
 const gridSizes = {
-  small: 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6',
-  medium: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-  large: 'grid-cols-1 md:grid-cols-2'
+  small: 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6',
+  medium: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  large: 'grid-cols-1 lg:grid-cols-2'
 }
 
 export default function GaleriePage() {
@@ -241,25 +241,28 @@ export default function GaleriePage() {
                   variant={gridSize === 'small' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setGridSize('small')}
-                  className="rounded-r-none"
+                  className="rounded-r-none min-h-[44px]"
                 >
-                  <Grid3x3 className="h-4 w-4" />
+                  <Grid3x3 className="h-5 w-5" />
+                  <span className="sr-only">Kleine Ansicht</span>
                 </Button>
                 <Button
                   variant={gridSize === 'medium' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setGridSize('medium')}
-                  className="rounded-none border-x"
+                  className="rounded-none border-x min-h-[44px]"
                 >
-                  <Grid className="h-4 w-4" />
+                  <Grid className="h-5 w-5" />
+                  <span className="sr-only">Mittlere Ansicht</span>
                 </Button>
                 <Button
                   variant={gridSize === 'large' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setGridSize('large')}
-                  className="rounded-l-none"
+                  className="rounded-l-none min-h-[44px]"
                 >
-                  <Grid className="h-4 w-4 scale-125" />
+                  <Grid className="h-5 w-5 scale-125" />
+                  <span className="sr-only">Große Ansicht</span>
                 </Button>
               </div>
             </div>
@@ -341,7 +344,7 @@ export default function GaleriePage() {
             </div>
           ) : (
             <>
-              <div className={cn("grid gap-4", gridSizes[gridSize])}>
+              <div className={cn("grid gap-4 sm:gap-6", gridSizes[gridSize])}>
                 {filteredImages.map((image, index) => (
                   <Card 
                     key={image.id} 
@@ -383,13 +386,14 @@ export default function GaleriePage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="absolute top-2 right-2 text-white bg-black/50 hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 text-white bg-black/50 hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity h-10 w-10 min-h-[44px] min-w-[44px]"
                         onClick={(e) => {
                           e.stopPropagation()
                           shareImage(image, 'facebook')
                         }}
                       >
-                        <Share2 className="h-4 w-4" />
+                        <Share2 className="h-5 w-5" />
+                        <span className="sr-only">Bild teilen</span>
                       </Button>
                     </div>
 
