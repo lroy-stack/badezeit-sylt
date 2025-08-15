@@ -5,12 +5,7 @@
 Configura estas variables en tu dashboard de Vercel (Settings → Environment Variables):
 
 ```bash
-# Database (REQUERIDO)
-DATABASE_URL="postgresql://postgres:Cryptorevolution23@db.ayugwprhixtsfktxungq.supabase.co:5432/postgres"
 
-# Supabase Auth (REQUERIDO para login/logout)
-NEXT_PUBLIC_SUPABASE_URL="https://ayugwprhixtsfktxungq.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5dWd3cHJoaXh0c2ZrdHh1bmdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMzI3MzcsImV4cCI6MjA3MDYwODczN30.oZsGU6KhLshXga0IWQOqkDwJ9Za97c_cQize5FCkhnI"
 ```
 
 ### ⚠️ Variables críticas para funcionamiento:
@@ -83,13 +78,10 @@ Si hay problemas:
 2. **Check logs** en Vercel Functions
 3. **Recrear usuario demo** si necesario:
    ```bash
-   PGPASSWORD="Cryptorevolution23" psql -h db.ayugwprhixtsfktxungq.supabase.co -U postgres -d postgres -p 5432 -c "DELETE FROM auth.users WHERE email = 'demouser@badezeit.de';"
-   node create-demo-user.js
-   ```
+
 
 ## 📱 URLs Importantes
 
 - **Demo Site:** https://badezeit-sylt.vercel.app
 - **Login:** https://badezeit-sylt.vercel.app/login
 - **Dashboard:** https://badezeit-sylt.vercel.app/dashboard
-- **Supabase Dashboard:** https://supabase.com/dashboard/project/ayugwprhixtsfktxungq
