@@ -1,7 +1,7 @@
 # 🗃️ DATABASE SCHEMA ANALYSIS - SUPABASE POSTGRESQL
 ## Vollständige Analyse der Live-Produktionsdatenbank Badezeit Sylt
 
-**Database URL:** `postgresql://postgres:***@db.ayugwprhixtsfktxungq.supabase.co:5432/postgres`  
+**Database URL:** `postgresql://postgres:***@[PRODUCTION_HOST]:5432/postgres`  
 **Analysiert:** 2025-01-13  
 **Schema Version:** Production Live  
 **Tabellen:** 14 Entities mit vollständigen Relationen  
@@ -488,7 +488,7 @@ ORDER BY mean_time DESC;
 -- Retention: 30 days
 
 -- Manual Backup Commands
-pg_dump postgresql://postgres:***@db.ayugwprhixtsfktxungq.supabase.co:5432/postgres \
+pg_dump postgresql://postgres:***@[PRODUCTION_HOST]:5432/postgres \
   --clean --no-owner --no-privileges \
   --file=badezeit_backup_$(date +%Y%m%d).sql
 ```

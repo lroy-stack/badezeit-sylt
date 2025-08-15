@@ -226,7 +226,7 @@ El usuario actualmente **solo puede acceder al dashboard principal** porque 4 p�
 ### Estado de la Base de Datos: 100% Operacional ✅
 
 **Conexión Supabase**:
-- **Host**: db.ayugwprhixtsfktxungq.supabase.co
+- **Host**: [CONFIGURED_IN_PRODUCTION]
 - **Database**: postgres
 - **Status**: ✅ Completamente funcional y poblada
 
