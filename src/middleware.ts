@@ -1,24 +1,10 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  // Simple auth check without Supabase realtime dependencies 
-  // This avoids Edge Runtime compatibility issues
-  const pathname = request.nextUrl.pathname
-  
-  // Allow public routes
-  if (!pathname.startsWith('/dashboard')) {
-    return NextResponse.next()
-  }
-  
-  // For dashboard routes, redirect to login if no auth
-  // This is a simplified version - full auth is handled by page components
-  const authCookie = request.cookies.get('sb-ayugwprhixtsfktxungq-auth-token')
-  
-  if (!authCookie && pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-  
-  return NextResponse.next()
+  // Use proper Supabase middleware for session management
+  // This handles concurrent users and proper session updates
+  return await updateSession(request)
 }
 
 export const config = {

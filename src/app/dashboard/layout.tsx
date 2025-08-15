@@ -13,27 +13,12 @@ import {
   Table,
   Menu,
   BarChart3,
-  Settings,
-  LogOut
+  Settings
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-// Check if Clerk is properly configured
-const isClerkConfigured = () => {
-  if (typeof window === 'undefined') {
-    // Server-side check
-    return (
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.startsWith('pk_') &&
-      process.env.CLERK_SECRET_KEY &&
-      process.env.CLERK_SECRET_KEY.startsWith('sk_') &&
-      !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('your_clerk_publishable_key_here') &&
-      !process.env.CLERK_SECRET_KEY.includes('your_clerk_secret_key_here')
-    )
-  }
-  return false
-}
+import { LogoutButton } from '@/components/auth/logout-button'
 
 
 interface DashboardLayoutProps {
@@ -123,7 +108,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
   // Check authentication first
   const user = await getCurrentUser()
   if (!user) {
-    redirect('/sign-in?redirect_url=/dashboard')
+    redirect('/login')
   }
 
   // Filter navigation items based on user role
@@ -173,7 +158,7 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
         {/* User Section */}
         <div className="p-4 border-t">
           <div className="flex items-center gap-3 mb-4">
-            {/* Simple user avatar for development mode */}
+            {/* User avatar */}
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-gray-600" />
             </div>
@@ -182,11 +167,14 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
                 {user.firstName} {user.lastName}
               </p>
               <p className="text-xs text-muted-foreground">{user.role}</p>
-              {!isClerkConfigured() && (
-                <p className="text-xs text-orange-600">Dev Mode</p>
-              )}
             </div>
           </div>
+          
+          {/* Logout Button */}
+          <LogoutButton 
+            className="w-full justify-start gap-3 h-10 font-normal" 
+            variant="ghost"
+          />
         </div>
       </aside>
 

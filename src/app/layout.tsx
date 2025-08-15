@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs'
 import { QueryProvider } from '@/components/providers/query-provider'
 import { Toaster } from '@/components/ui/sonner'
 import "./globals.css";
@@ -9,11 +8,6 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 });
-
-// Check if we have valid Clerk keys
-const hasValidClerkKeys = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_') && 
-                         process.env.CLERK_SECRET_KEY?.startsWith('sk_') && 
-                         !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('your_clerk_publishable_key_here')
 
 export const metadata: Metadata = {
   title: "Badezeit Sylt - Restaurant am Meer",
@@ -33,7 +27,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const content = (
+  return (
     <html lang="de">
       <body className={`${inter.variable} font-sans antialiased`}>
         <QueryProvider>
@@ -43,15 +37,4 @@ export default function RootLayout({
       </body>
     </html>
   )
-
-  // Only use ClerkProvider if we have valid keys
-  if (hasValidClerkKeys) {
-    return (
-      <ClerkProvider>
-        {content}
-      </ClerkProvider>
-    );
-  }
-
-  return content;
 }
