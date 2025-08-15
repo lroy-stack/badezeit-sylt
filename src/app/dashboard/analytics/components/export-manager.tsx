@@ -207,8 +207,8 @@ export function ExportManager({
         }
       })
 
-      // Footer
-      const pageCount = doc.getNumberOfPages()
+      // Footer  
+      const pageCount = (doc as any).internal.pages.length
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i)
         doc.setFontSize(8)
