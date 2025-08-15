@@ -30,9 +30,9 @@ export function LogoutButton({
       if (error) {
         console.error('Logout error:', error)
       } else {
+        console.log('Logout successful, redirecting to login')
         // Redirect to login page after successful logout
         router.push('/login')
-        router.refresh()
       }
     } catch (error) {
       console.error('Logout error:', error)

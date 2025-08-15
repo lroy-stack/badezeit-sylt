@@ -30,14 +30,17 @@ export default function LoginPage() {
       })
 
       if (signInError) {
+        console.error('Sign in error:', signInError)
         setError('Falsche Anmeldedaten. Demo: demouser@badezeit.de / badezeit00')
         return
       }
 
       if (data.user) {
+        console.log('Login successful, redirecting to dashboard')
         router.push('/dashboard')
       }
     } catch (err) {
+      console.error('Login catch error:', err)
       setError('Verbindungsfehler. Bitte versuchen Sie es erneut.')
     } finally {
       setLoading(false)

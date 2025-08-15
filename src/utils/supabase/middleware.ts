@@ -41,6 +41,7 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/dashboard')
   ) {
     // no user accessing protected /dashboard routes, redirect to login
+    console.log('Redirecting unauthenticated user from', request.nextUrl.pathname, 'to /login')
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

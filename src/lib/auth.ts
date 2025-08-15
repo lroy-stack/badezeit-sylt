@@ -14,8 +14,11 @@ export async function getCurrentUser() {
     }
 
     if (!user) {
+      console.log('No authenticated user found')
       return null
     }
+
+    console.log('Found authenticated user:', user.email)
 
     // Get user from our database using email
     const dbUser = await db.user.findUnique({
