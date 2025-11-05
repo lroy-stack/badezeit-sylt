@@ -1,10 +1,10 @@
 # Strandrestaurant Badezeit - Website & Restaurantmanagement
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.0.1-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.1.0-blue?style=flat-square&logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-6.14.0-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.18.0-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
 
 > **WICHTIGER HINWEIS**: Das Strandrestaurant Badezeit ist aufgrund eines Brandes derzeit geschlossen. Die Wiedereröffnung ist für 2025 geplant.
 
@@ -24,21 +24,23 @@ Dies ist die **offizielle Website** des **Strandrestaurant Badezeit** - einem au
 ## 🏗️ Technische Architektur
 
 ### Frontend-Stack
-- **Framework**: Next.js 15 mit App Router
-- **React**: Version 19.1.0
-- **TypeScript**: Vollständige Typisierung
+- **Framework**: Next.js 16.0.1 mit App Router + Turbopack
+- **React**: Version 19.1.0 (stable)
+- **TypeScript**: Vollständige strict mode Typisierung
 - **Styling**: Tailwind CSS 4.x mit shadcn/ui Komponenten
 - **Icons**: Lucide React
-- **Animationen**: tw-animate-css
+- **Animationen**: Framer Motion + tw-animate-css
+- **UI-Komponenten**: shadcn/ui (Radix UI primitives)
+- **Theming**: 5 OKLCH-Farbschemata (Coral, Ocean, Forest, Sunset, Midnight)
 
 ### Backend & Datenbank
 - **Datenbank**: PostgreSQL (Supabase)
-- **ORM**: Prisma 6.14.0
-- **Authentifizierung**: Clerk (Development-Modus bei fehlenden Keys)
+- **ORM**: Prisma 6.18.0 (mit prisma.config.ts)
+- **Authentifizierung**: Supabase Auth (migrated from Clerk)
 - **Email**: React Email mit Resend Integration
 - **Formulare**: React Hook Form mit Server Actions und Zod-Validierung
 - **Export**: jsPDF (PDF-Generation) + XLSX (Excel-Export)
-- **State Management**: TanStack Query für Server-State
+- **State Management**: TanStack Query v5 für Server-State
 
 ### Deployment & Hosting
 - **Plattform**: Vercel (Next.js optimiert)
@@ -140,6 +142,84 @@ npm run dev
 # 3. Navigiere zu /dashboard/analytics für Export-Funktionen
 # 4. Teste alle Tab-Navigationen im Speisekarte-Bereich
 ```
+
+## 🎨 Admin Panel (Neu Gestaltet für Next.js 16)
+
+Das Admin-Panel wurde vollständig neu gestaltet mit modernem, flüssigem und responsive Design.
+
+### Hauptmerkmale
+
+#### 1. Responsive Layout
+- **Kollapierbarer Sidebar**: 80px ↔ 280px (Desktop)
+- **Mobile Hamburger-Menü**: Touch-optimiert für Smartphones
+- **Smooth Animations**: Framer Motion für flüssige Übergänge
+- **Dark Mode Support**: Vollständige Unterstützung aller 5 Themes
+
+#### 2. Navigation System
+- **Breadcrumbs**: Dynamische Navigation mit aktuellem Pfad
+- **Command Menu**: Globale Suche (Cmd+K / Ctrl+K)
+- **Role-based Access**: Automatische Filterung nach Benutzerrolle
+- **Collapsible Sub-items**: Einstellungen mit Untermenü
+
+#### 3. Einstellungen-Seite (4 Hauptabschnitte)
+
+**📍 Allgemein**
+- Restaurant-Informationen (Name, Beschreibung, Website)
+- Regional-Einstellungen (Sprache, Zeitzone, Währung)
+- Datums- und Zeitformate
+- Kontaktinformationen (Telefon, E-Mail, Adresse)
+
+**🎨 Branding**
+- Logo- und Favicon-Upload
+- Farbschema (Primär-, Sekundär-, Akzentfarbe)
+- Visuelle Identität
+- Color Picker Integration
+
+**🔔 Benachrichtigungen**
+- E-Mail-Benachrichtigungen (An/Aus)
+- SMS-Benachrichtigungen (An/Aus)
+- Absender-E-Mail konfigurieren
+- Template-Verwaltung (geplant)
+
+**🛡️ System**
+- Benutzerstatistiken (Total, Admins, Manager, Staff)
+- Wartungsmodus-Schalter
+- Automatische Backups (Häufigkeit konfigurierbar)
+- Backup herunterladen/hochladen
+- Datenaufbewahrung
+
+#### 4. Design-Prinzipien
+- **Mobile-First**: Optimiert für Touch-Geräte
+- **WCAG-konform**: Barrierefreie Bedienelemente
+- **Konsistente Typografie**: Inter Font-Family
+- **Spacing System**: Konsistente Abstände (4px Basis)
+- **Card-based Layout**: Übersichtliche Gruppierung
+
+### Technische Verbesserungen
+
+#### Prisma Configuration
+```typescript
+// Migriert von package.json zu prisma.config.ts
+export default defineConfig({
+  seed: {
+    command: 'tsx prisma/seed.ts',
+  },
+  generator: {
+    provider: 'prisma-client-js',
+    output: '../node_modules/@prisma/client',
+  },
+})
+```
+
+#### Server/Client Components
+- Klare Trennung zwischen Server und Client Components
+- Optimale Performance durch selective hydration
+- Suspense boundaries für besseres Loading UX
+
+#### Lazy Loading
+- Dynamische Imports für große Komponenten
+- Code-Splitting nach Routen
+- Optimierte Bundle-Größe
 
 ## 📁 Projektstruktur
 
