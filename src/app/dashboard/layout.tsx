@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/auth'
 // Force dynamic rendering for all dashboard routes
 export const dynamic = 'force-dynamic'
 import { cn } from '@/lib/utils'
-import { 
+import {
   LayoutDashboard,
   Calendar,
   Users,
@@ -19,6 +19,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { LogoutButton } from '@/components/auth/logout-button'
+import { CommandMenu } from '@/components/command-menu'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 
 interface DashboardLayoutProps {
@@ -180,6 +182,16 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
+        {/* Header with Search and Theme Toggle */}
+        <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center gap-4 px-6">
+            <CommandMenu userRole={user.role} />
+            <div className="ml-auto flex items-center gap-2">
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+
         <Suspense fallback={<DashboardSkeleton />}>
           {children}
         </Suspense>
