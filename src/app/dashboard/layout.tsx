@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/auth'
 // Force dynamic rendering for all dashboard routes
 export const dynamic = 'force-dynamic'
 import { cn } from '@/lib/utils'
-import { 
+import {
   LayoutDashboard,
   Calendar,
   Users,
@@ -13,16 +13,29 @@ import {
   Table,
   Menu,
   BarChart3,
-  Settings
+  Settings,
+  Building2,
+  Bell,
+  Mail,
+  Shield,
+  Globe
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { LogoutButton } from '@/components/auth/logout-button'
+import { CommandMenu } from '@/components/command-menu'
+import { CollapsibleNavItem } from '@/components/collapsible-nav-item'
 
 
 interface DashboardLayoutProps {
   children: ReactNode
+}
+
+interface SubItem {
+  name: string
+  href: string
+  icon?: any
 }
 
 interface NavigationItem {
@@ -30,6 +43,7 @@ interface NavigationItem {
   href: string
   icon: any
   roles: string[]
+  subItems?: SubItem[]
 }
 
 const navigationItems: NavigationItem[] = [
@@ -73,7 +87,44 @@ const navigationItems: NavigationItem[] = [
     name: 'Einstellungen',
     href: '/dashboard/einstellungen',
     icon: Settings,
-    roles: ['ADMIN']
+    roles: ['ADMIN'],
+    subItems: [
+      {
+        name: 'Allgemein',
+        href: '/dashboard/einstellungen?section=general',
+        icon: Settings
+      },
+      {
+        name: 'Geschäftsdaten',
+        href: '/dashboard/einstellungen?section=business',
+        icon: Building2
+      },
+      {
+        name: 'Mitarbeiter',
+        href: '/dashboard/einstellungen?section=staff',
+        icon: Users
+      },
+      {
+        name: 'Benachrichtigungen',
+        href: '/dashboard/einstellungen?section=notifications',
+        icon: Bell
+      },
+      {
+        name: 'E-Mail',
+        href: '/dashboard/einstellungen?section=email',
+        icon: Mail
+      },
+      {
+        name: 'Sicherheit',
+        href: '/dashboard/einstellungen?section=security',
+        icon: Shield
+      },
+      {
+        name: 'Integrationen',
+        href: '/dashboard/einstellungen?section=integrations',
+        icon: Globe
+      }
+    ]
   }
 ]
 
@@ -134,9 +185,24 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto">
           <ul className="space-y-2">
             {allowedNavigation.map((item) => {
+              // Si el item tiene subitems, usar CollapsibleNavItem
+              if (item.subItems && item.subItems.length > 0) {
+                return (
+                  <CollapsibleNavItem
+                    key={item.href}
+                    name={item.name}
+                    href={item.href}
+                    icon={item.icon}
+                    subItems={item.subItems}
+                    roles={item.roles}
+                  />
+                )
+              }
+
+              // Si no tiene subitems, renderizar item normal
               const Icon = item.icon
               return (
                 <li key={item.href}>
@@ -180,6 +246,13 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
+        {/* Header with Search */}
+        <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center gap-4 px-6">
+            <CommandMenu userRole={user.role} />
+          </div>
+        </div>
+
         <Suspense fallback={<DashboardSkeleton />}>
           {children}
         </Suspense>

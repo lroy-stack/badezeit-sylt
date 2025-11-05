@@ -21,6 +21,7 @@ model User {
   menuItemsCreated    MenuItem[]     @relation("CreatedBy")
   reservationsCreated Reservation[]  @relation("CreatedBy")
   reservationsUpdated Reservation[]  @relation("UpdatedBy")
+  activityLogs        ActivityLog[]
 
   @@map("users")
 }
@@ -271,6 +272,24 @@ model SystemSetting {
   @@map("system_settings")
 }
 
+model ActivityLog {
+  id          String           @id @default(cuid())
+  userId      String
+  action      ActivityAction
+  entityType  String?
+  entityId    String?
+  description String
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime         @default(now())
+  user        User             @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
 enum UserRole {
   ADMIN
   MANAGER
@@ -329,4 +348,24 @@ enum AnalyticsEventType {
 enum Language {
   DE
   EN
+}
+
+enum ActivityAction {
+  LOGIN
+  LOGOUT
+  CREATE_RESERVATION
+  UPDATE_RESERVATION
+  CANCEL_RESERVATION
+  CREATE_CUSTOMER
+  UPDATE_CUSTOMER
+  DELETE_CUSTOMER
+  CREATE_TABLE
+  UPDATE_TABLE
+  DELETE_TABLE
+  CREATE_MENU_ITEM
+  UPDATE_MENU_ITEM
+  DELETE_MENU_ITEM
+  UPDATE_SETTINGS
+  EXPORT_DATA
+  VIEW_ANALYTICS
 }

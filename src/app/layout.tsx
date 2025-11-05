@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { QueryProvider } from '@/components/providers/query-provider'
+import { ThemeProvider } from '@/components/providers/theme-provider'
+import { FloatingThemeToggle } from '@/components/floating-theme-toggle'
 import { Toaster } from '@/components/ui/sonner'
 import "./globals.css";
 
@@ -28,12 +30,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de">
+    <html lang="de" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <QueryProvider>
-          {children}
-          <Toaster />
-        </QueryProvider>
+        <ThemeProvider
+          attribute={["class", "data-theme"]}
+          defaultTheme="coral"
+          enableSystem={false}
+          disableTransitionOnChange
+          themes={["light", "dark", "coral", "ocean", "forest", "sunset", "midnight"]}
+          storageKey="badezeit-theme"
+        >
+          <QueryProvider>
+            {children}
+            <FloatingThemeToggle />
+            <Toaster />
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
