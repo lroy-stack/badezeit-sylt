@@ -124,16 +124,16 @@ export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative h-full w-full">
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring/50"
+        className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-primary-foreground transition-colors hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        aria-label="Select theme"
+        aria-label="Seleccionar tema"
         aria-expanded={isOpen}
       >
-        <Palette className="h-5 w-5" />
+        <Palette className="h-5 w-5 md:h-6 md:w-6" />
       </motion.button>
 
       <AnimatePresence>
@@ -150,20 +150,20 @@ export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
 
             {/* Dropdown Menu */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-12 z-50 w-72 overflow-hidden rounded-lg border bg-popover shadow-xl"
+              className="absolute right-0 bottom-12 z-50 w-[calc(100vw-2rem)] max-w-[320px] sm:w-80 overflow-hidden rounded-lg border bg-popover shadow-xl"
             >
-              <div className="p-4">
+              <div className="p-3 sm:p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">Theme</h3>
+                  <h3 className="text-sm font-semibold">Tema</h3>
                   <button
                     onClick={handleModeToggle}
-                    className="rounded-md px-2 py-1 text-xs font-medium transition-colors hover:bg-muted"
+                    className="min-h-[32px] rounded-md px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted active:scale-95"
                   >
-                    {isDarkMode ? "Dark" : "Light"}
+                    {isDarkMode ? "🌙 Oscuro" : "☀️ Claro"}
                   </button>
                 </div>
 
@@ -179,24 +179,24 @@ export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
                         key={themeOption.name}
                         onClick={() => handleThemeSelect(themeOption.name)}
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors",
+                          "flex w-full items-center gap-3 rounded-lg p-2.5 sm:p-3 text-left transition-colors min-h-[52px] sm:min-h-[60px]",
                           isActive
-                            ? "bg-accent text-accent-foreground"
-                            : "hover:bg-muted"
+                            ? "bg-accent text-accent-foreground ring-2 ring-primary/20"
+                            : "hover:bg-muted active:scale-[0.98]"
                         )}
-                        whileHover={{ scale: 1.02 }}
+                        whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.98 }}
                       >
                         {/* Color Preview */}
                         <div
-                          className="h-8 w-8 flex-shrink-0 rounded-md border shadow-sm"
+                          className="h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 rounded-md border-2 shadow-sm"
                           style={{ backgroundColor: previewColor }}
                         />
 
                         {/* Theme Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium">
+                            <p className="text-sm sm:text-base font-medium">
                               {themeOption.label}
                             </p>
                             {isActive && (
@@ -205,7 +205,7 @@ export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
                                 animate={{ scale: 1 }}
                                 exit={{ scale: 0 }}
                               >
-                                <Check className="h-3.5 w-3.5 text-primary" />
+                                <Check className="h-4 w-4 text-primary" />
                               </motion.div>
                             )}
                           </div>
@@ -220,14 +220,14 @@ export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
               </div>
 
               {/* Footer with mode toggle */}
-              <div className="border-t bg-muted/20 p-3">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Mode</span>
+              <div className="border-t bg-muted/20 p-2.5 sm:p-3">
+                <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
+                  <span className="font-medium">Modo</span>
                   <button
                     onClick={handleModeToggle}
-                    className="rounded-md bg-background px-3 py-1.5 font-medium shadow-sm transition-colors hover:bg-accent"
+                    className="min-h-[36px] rounded-md bg-background px-4 py-2 font-medium shadow-sm transition-all hover:bg-accent active:scale-95"
                   >
-                    {isDarkMode ? "🌙 Dark" : "☀️ Light"}
+                    {isDarkMode ? "🌙 Oscuro" : "☀️ Claro"}
                   </button>
                 </div>
               </div>
