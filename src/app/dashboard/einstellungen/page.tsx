@@ -305,9 +305,7 @@ export default async function EinstellungenPage({ searchParams }: SettingsPagePr
 
   return (
     <div className="flex h-full">
-      <SettingsNav currentSection={currentSection} />
-      
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-4 md:p-6">
         <SettingsHeader settings={settings} />
 
         <Suspense fallback={<SettingsLoading />}>
