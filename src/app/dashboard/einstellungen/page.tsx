@@ -128,66 +128,27 @@ async function getUserStats() {
   }
 }
 
-function SettingsNav({ currentSection }: { currentSection: string }) {
-  const sections = [
-    { id: 'general', name: 'Allgemein', icon: Settings },
-    { id: 'business', name: 'Geschäftsdaten', icon: Building2 },
-    { id: 'staff', name: 'Mitarbeiter', icon: Users },
-    { id: 'notifications', name: 'Benachrichtigungen', icon: Bell },
-    { id: 'email', name: 'E-Mail', icon: Mail },
-    { id: 'security', name: 'Sicherheit', icon: Shield },
-    { id: 'integrations', name: 'Integrationen', icon: Globe }
-  ]
-
-  return (
-    <nav className="w-64 bg-card border-r">
-      <div className="p-4">
-        <h2 className="text-lg font-semibold mb-4">Einstellungen</h2>
-        <div className="space-y-1">
-          {sections.map((section) => {
-            const Icon = section.icon
-            const isActive = currentSection === section.id
-            
-            return (
-              <Link
-                key={section.id}
-                href={`/dashboard/einstellungen?section=${section.id}`}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-muted'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {section.name}
-              </Link>
-            )
-          })}
-        </div>
-      </div>
-    </nav>
-  )
-}
+// Navegación removida - ahora se maneja en el sidebar principal del dashboard
 
 function SettingsHeader({ settings }: { settings: any }) {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
       <div>
-        <h1 className="text-3xl font-bold">Systemeinstellungen</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-bold">Systemeinstellungen</h1>
+        <p className="text-sm md:text-base text-muted-foreground mt-1">
           Konfigurieren Sie Restaurant-Einstellungen und Systemparameter
         </p>
       </div>
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
           <Download className="h-4 w-4 mr-2" />
-          Export
+          <span className="hidden sm:inline">Export</span>
         </Button>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
           <Upload className="h-4 w-4 mr-2" />
-          Import
+          <span className="hidden sm:inline">Import</span>
         </Button>
-        <Button size="sm">
+        <Button size="sm" className="flex-1 sm:flex-none">
           <Save className="h-4 w-4 mr-2" />
           Speichern
         </Button>

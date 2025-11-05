@@ -33,10 +33,12 @@ export default function RootLayout({
     <html lang="de" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
+          attribute={["class", "data-theme"]}
+          defaultTheme="coral"
           enableSystem={false}
           disableTransitionOnChange
+          themes={["light", "dark", "coral", "ocean", "forest", "sunset", "midnight"]}
+          storageKey="badezeit-theme"
         >
           <QueryProvider>
             {children}
