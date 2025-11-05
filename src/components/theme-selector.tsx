@@ -72,23 +72,21 @@ interface ThemeSelectorProps {
 }
 
 export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
+  // All hooks MUST be at the top level before any early returns
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
   const [isOpen, setIsOpen] = React.useState(false)
+  const [currentThemeName, setCurrentThemeName] = React.useState<ThemeName>("coral")
+
+  const isDarkMode = theme === "dark"
 
   React.useEffect(() => {
     setMounted(true)
   }, [])
 
-  if (!mounted) {
-    return null
-  }
-
-  // Parse current theme from localStorage or use default
-  const [currentThemeName, setCurrentThemeName] = React.useState<ThemeName>("coral")
-  const isDarkMode = theme === "dark"
-
   React.useEffect(() => {
+    if (!mounted) return
+
     // Get the stored theme name from localStorage or attribute
     const storedTheme = localStorage.getItem("badezeit-theme-name") as ThemeName
     const htmlElement = document.documentElement
@@ -97,7 +95,12 @@ export function ThemeSelector({ onThemeChange }: ThemeSelectorProps) {
     const themeName = storedTheme || dataTheme || "coral"
     setCurrentThemeName(themeName)
     htmlElement.setAttribute("data-theme", themeName)
-  }, [])
+  }, [mounted])
+
+  // Early return AFTER all hooks
+  if (!mounted) {
+    return null
+  }
 
   const handleThemeSelect = (themeName: ThemeName) => {
     const htmlElement = document.documentElement
