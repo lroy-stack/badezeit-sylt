@@ -1,7 +1,8 @@
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
+// Next.js 16: middleware → proxy convention
+export async function proxy(request: NextRequest) {
   // Use proper Supabase middleware for session management
   // This handles concurrent users and proper session updates
   return await updateSession(request)
