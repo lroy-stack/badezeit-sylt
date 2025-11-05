@@ -2,35 +2,30 @@
 export const dynamic = 'force-dynamic'
 
 import { Suspense } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { requireRole } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { GeneralSettingsForm } from './components/general-settings-form'
-import { BusinessSettingsForm } from './components/business-settings-form'
 import {
   Settings,
-  Building2,
-  Users,
-  Mail,
-  Globe,
-  Shield,
-  Database,
-  Bell,
   Palette,
-  Clock,
-  MapPin,
-  Phone,
-  Save,
-  RotateCcw,
-  Upload,
+  Bell,
+  Shield,
+  Globe,
+  Paintbrush,
+  Mail,
+  Database,
+  Users,
   Download,
-  Key,
-  Activity
+  Upload
 } from 'lucide-react'
-import Link from 'next/link'
+
+// Import section components
+import { GeneralSettingsSection } from './components/general-settings-section'
+import { BrandingSettingsSection } from './components/branding-settings-section'
+import { NotificationSettingsSection } from './components/notification-settings-section'
+import { SystemSettingsSection } from './components/system-settings-section'
 
 interface SettingsPageProps {
   searchParams: Promise<{
@@ -43,13 +38,11 @@ async function getSystemSettings() {
     orderBy: { key: 'asc' }
   })
 
-  // Konvertiere zu Key-Value Objekt
   const settingsMap = settings.reduce((acc, setting) => {
     acc[setting.key] = setting.value
     return acc
   }, {} as Record<string, string>)
 
-  // Default Werte für fehlende Einstellungen
   return {
     // Allgemeine Einstellungen
     restaurantName: settingsMap.restaurantName || 'Badezeit Sylt',
@@ -57,299 +50,154 @@ async function getSystemSettings() {
     defaultLanguage: settingsMap.defaultLanguage || 'de',
     timezone: settingsMap.timezone || 'Europe/Berlin',
     currency: settingsMap.currency || 'EUR',
+    dateFormat: settingsMap.dateFormat || 'DD.MM.YYYY',
+    timeFormat: settingsMap.timeFormat || '24h',
+
+    // Branding
     logoUrl: settingsMap.logoUrl || '',
-    
-    // Geschäftszeiten
-    openingHours: settingsMap.openingHours || '{"monday":{"open":"11:00","close":"22:00","closed":false},"tuesday":{"open":"11:00","close":"22:00","closed":false},"wednesday":{"open":"11:00","close":"22:00","closed":false},"thursday":{"open":"11:00","close":"22:00","closed":false},"friday":{"open":"11:00","close":"23:00","closed":false},"saturday":{"open":"11:00","close":"23:00","closed":false},"sunday":{"open":"12:00","close":"22:00","closed":false}}',
-    
+    faviconUrl: settingsMap.faviconUrl || '',
+    primaryColor: settingsMap.primaryColor || '#FF6B35',
+    secondaryColor: settingsMap.secondaryColor || '#004E89',
+    accentColor: settingsMap.accentColor || '#F7931E',
+
     // Kontaktinformationen
     address: settingsMap.address || 'Strandstraße 1, 25980 Sylt',
     phone: settingsMap.phone || '+49 4651 123456',
     email: settingsMap.email || 'info@badezeit-sylt.de',
     website: settingsMap.website || 'https://badezeit-sylt.de',
-    
+
     // Reservierungseinstellungen
     maxReservationDays: settingsMap.maxReservationDays || '60',
     minReservationHours: settingsMap.minReservationHours || '2',
     defaultReservationDuration: settingsMap.defaultReservationDuration || '120',
     maxPartySize: settingsMap.maxPartySize || '12',
-    
-    // E-Mail-Einstellungen
-    smtpHost: settingsMap.smtpHost || '',
-    smtpPort: settingsMap.smtpPort || '587',
-    smtpUser: settingsMap.smtpUser || '',
-    smtpPassword: settingsMap.smtpPassword || '••••••••',
-    fromEmail: settingsMap.fromEmail || 'noreply@badezeit-sylt.de',
-    
+
     // Benachrichtigungen
-    emailNotifications: settingsMap.emailNotifications === 'true',
-    smsNotifications: settingsMap.smsNotifications === 'true',
-    pushNotifications: settingsMap.pushNotifications === 'true',
-    
-    // Sicherheit
-    sessionTimeout: settingsMap.sessionTimeout || '30',
-    passwordMinLength: settingsMap.passwordMinLength || '8',
-    twoFactorRequired: settingsMap.twoFactorRequired === 'true',
-    
-    // Integration
-    googleMapsApiKey: settingsMap.googleMapsApiKey || '',
-    analyticsId: settingsMap.analyticsId || '',
-    facebookPixel: settingsMap.facebookPixel || '',
-    
-    lastUpdated: settings.length > 0 ? settings[0].updatedAt : new Date()
+    emailNotificationsEnabled: settingsMap.emailNotificationsEnabled || 'true',
+    smsNotificationsEnabled: settingsMap.smsNotificationsEnabled || 'false',
+    notificationEmailFrom: settingsMap.notificationEmailFrom || 'noreply@badezeit-sylt.de',
+
+    // System
+    maintenanceMode: settingsMap.maintenanceMode || 'false',
+    autoBackupEnabled: settingsMap.autoBackupEnabled || 'true',
+    backupFrequency: settingsMap.backupFrequency || 'daily',
+    dataRetentionDays: settingsMap.dataRetentionDays || '365',
   }
 }
 
 async function getUserStats() {
-  const [
-    totalUsers,
-    adminUsers,
-    managerUsers,
-    staffUsers,
-    kitchenUsers,
-    activeUsers
-  ] = await Promise.all([
+  const [totalUsers, adminCount, managerCount, staffCount] = await Promise.all([
     db.user.count(),
     db.user.count({ where: { role: 'ADMIN' } }),
     db.user.count({ where: { role: 'MANAGER' } }),
     db.user.count({ where: { role: 'STAFF' } }),
-    db.user.count({ where: { role: 'KITCHEN' } }),
-    db.user.count({ where: { isActive: true } })
   ])
 
   return {
-    totalUsers,
-    adminUsers,
-    managerUsers,
-    staffUsers,
-    kitchenUsers,
-    activeUsers,
-    inactiveUsers: totalUsers - activeUsers
+    total: totalUsers,
+    admins: adminCount,
+    managers: managerCount,
+    staff: staffCount,
   }
 }
 
-// Navegación removida - ahora se maneja en el sidebar principal del dashboard
-
-function SettingsHeader({ settings }: { settings: any }) {
+function SettingsHeader() {
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">Systemeinstellungen</h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-1">
-          Konfigurieren Sie Restaurant-Einstellungen und Systemparameter
-        </p>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
-          <Download className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline">Export</span>
-        </Button>
-        <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
-          <Upload className="h-4 w-4 mr-2" />
-          <span className="hidden sm:inline">Import</span>
-        </Button>
-        <Button size="sm" className="flex-1 sm:flex-none">
-          <Save className="h-4 w-4 mr-2" />
-          Speichern
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-
-
-function StaffManagement({ userStats }: { userStats: any }) {
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Gesamt</p>
-                <p className="text-2xl font-bold">{userStats.totalUsers}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Activity className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Aktiv</p>
-                <p className="text-2xl font-bold">{userStats.activeUsers}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Shield className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Admins</p>
-                <p className="text-2xl font-bold">{userStats.adminUsers}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Users className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Manager</p>
-                <p className="text-2xl font-bold">{userStats.managerUsers}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Rollenverteilung</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <p className="font-medium">Administrator</p>
-                <p className="text-sm text-muted-foreground">Vollzugriff auf alle Funktionen</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge>{userStats.adminUsers} Benutzer</Badge>
-                <Button variant="outline" size="sm">Verwalten</Button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <p className="font-medium">Manager</p>
-                <p className="text-sm text-muted-foreground">Reservierungen, Kunden, Analytics</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge>{userStats.managerUsers} Benutzer</Badge>
-                <Button variant="outline" size="sm">Verwalten</Button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <p className="font-medium">Mitarbeiter</p>
-                <p className="text-sm text-muted-foreground">Reservierungen und Kunden</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge>{userStats.staffUsers} Benutzer</Badge>
-                <Button variant="outline" size="sm">Verwalten</Button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <p className="font-medium">Küche</p>
-                <p className="text-sm text-muted-foreground">Speisekarte und Allergene</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge>{userStats.kitchenUsers} Benutzer</Badge>
-                <Button variant="outline" size="sm">Verwalten</Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="space-y-2 mb-8">
+      <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+        <Settings className="h-8 w-8" />
+        Einstellungen
+      </h1>
+      <p className="text-muted-foreground">
+        Verwalten Sie die Systemeinstellungen, Branding, Benachrichtigungen und mehr.
+      </p>
     </div>
   )
 }
 
 function SettingsLoading() {
   return (
-    <div className="flex h-screen">
-      <div className="w-64 bg-muted animate-pulse" />
-      <div className="flex-1 p-6 space-y-6">
-        <div className="h-8 bg-muted rounded animate-pulse w-64" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-48 bg-muted rounded animate-pulse" />
-          ))}
-        </div>
-      </div>
+    <div className="space-y-6 animate-pulse">
+      <div className="h-8 bg-muted rounded w-64" />
+      <div className="h-[600px] bg-muted rounded" />
     </div>
   )
 }
 
-export default async function EinstellungenPage({ searchParams }: SettingsPageProps) {
-  const user = await requireRole(['ADMIN'])
+export default async function SettingsPage({ searchParams }: SettingsPageProps) {
+  // Require ADMIN role
+  await requireRole('ADMIN')
+
   const params = await searchParams
-  
+  const defaultSection = params.section || 'general'
+
+  // Fetch data in parallel
   const [settings, userStats] = await Promise.all([
     getSystemSettings(),
     getUserStats()
   ])
 
-  const currentSection = params?.section || 'general'
-
   return (
-    <div className="flex h-full">
-      <div className="flex-1 p-4 md:p-6">
-        <SettingsHeader settings={settings} />
+    <div className="space-y-6">
+      <SettingsHeader />
+
+      <Tabs defaultValue={defaultSection} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-auto p-1">
+          <TabsTrigger
+            value="general"
+            className="flex items-center gap-2 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="hidden sm:inline">Allgemein</span>
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="branding"
+            className="flex items-center gap-2 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Paintbrush className="h-4 w-4" />
+            <span className="hidden sm:inline">Branding</span>
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="notifications"
+            className="flex items-center gap-2 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Bell className="h-4 w-4" />
+            <span className="hidden sm:inline">Benachrichtigungen</span>
+          </TabsTrigger>
+
+          <TabsTrigger
+            value="system"
+            className="flex items-center gap-2 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">System</span>
+          </TabsTrigger>
+        </TabsList>
 
         <Suspense fallback={<SettingsLoading />}>
-          {currentSection === 'general' && <GeneralSettingsForm settings={settings} />}
-          {currentSection === 'business' && <BusinessSettingsForm settings={settings} />}
-          {currentSection === 'staff' && <StaffManagement userStats={userStats} />}
-          {currentSection === 'notifications' && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  Benachrichtigungseinstellungen werden implementiert...
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {currentSection === 'email' && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  E-Mail-Konfiguration wird implementiert...
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {currentSection === 'security' && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  Sicherheitseinstellungen werden implementiert...
-                </div>
-              </CardContent>
-            </Card>
-          )}
-          {currentSection === 'integrations' && (
-            <Card>
-              <CardContent className="p-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  Integrationen werden implementiert...
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* Allgemein Section */}
+          <TabsContent value="general" className="space-y-4">
+            <GeneralSettingsSection settings={settings} />
+          </TabsContent>
+
+          {/* Branding Section */}
+          <TabsContent value="branding" className="space-y-4">
+            <BrandingSettingsSection settings={settings} />
+          </TabsContent>
+
+          {/* Benachrichtigungen Section */}
+          <TabsContent value="notifications" className="space-y-4">
+            <NotificationSettingsSection settings={settings} />
+          </TabsContent>
+
+          {/* System Section */}
+          <TabsContent value="system" className="space-y-4">
+            <SystemSettingsSection settings={settings} userStats={userStats} />
+          </TabsContent>
         </Suspense>
-      </div>
+      </Tabs>
     </div>
   )
 }

@@ -1,152 +1,25 @@
 import { ReactNode, Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
+import { ResponsiveSidebar } from '@/components/dashboard/responsive-sidebar'
+import { DashboardNavbar } from '@/components/dashboard/dashboard-navbar'
 
 // Force dynamic rendering for all dashboard routes
 export const dynamic = 'force-dynamic'
-import { cn } from '@/lib/utils'
-import {
-  LayoutDashboard,
-  Calendar,
-  Users,
-  User,
-  Table,
-  Menu,
-  BarChart3,
-  Settings,
-  Building2,
-  Bell,
-  Mail,
-  Shield,
-  Globe
-} from 'lucide-react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { LogoutButton } from '@/components/auth/logout-button'
-import { CommandMenu } from '@/components/command-menu'
-import { CollapsibleNavItem } from '@/components/collapsible-nav-item'
-
 
 interface DashboardLayoutProps {
   children: ReactNode
 }
 
-interface SubItem {
-  name: string
-  href: string
-  icon?: any
-}
-
-interface NavigationItem {
-  name: string
-  href: string
-  icon: any
-  roles: string[]
-  subItems?: SubItem[]
-}
-
-const navigationItems: NavigationItem[] = [
-  {
-    name: 'Dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-    roles: ['ADMIN', 'MANAGER', 'STAFF', 'KITCHEN']
-  },
-  {
-    name: 'Reservierungen',
-    href: '/dashboard/reservierungen',
-    icon: Calendar,
-    roles: ['ADMIN', 'MANAGER', 'STAFF']
-  },
-  {
-    name: 'Kunden',
-    href: '/dashboard/kunden',
-    icon: Users,
-    roles: ['ADMIN', 'MANAGER', 'STAFF']
-  },
-  {
-    name: 'Tische',
-    href: '/dashboard/tische',
-    icon: Table,
-    roles: ['ADMIN', 'MANAGER', 'STAFF']
-  },
-  {
-    name: 'Speisekarte',
-    href: '/dashboard/speisekarte',
-    icon: Menu,
-    roles: ['ADMIN', 'MANAGER', 'KITCHEN']
-  },
-  {
-    name: 'Analytics',
-    href: '/dashboard/analytics',
-    icon: BarChart3,
-    roles: ['ADMIN', 'MANAGER']
-  },
-  {
-    name: 'Einstellungen',
-    href: '/dashboard/einstellungen',
-    icon: Settings,
-    roles: ['ADMIN'],
-    subItems: [
-      {
-        name: 'Allgemein',
-        href: '/dashboard/einstellungen?section=general',
-        icon: Settings
-      },
-      {
-        name: 'Geschäftsdaten',
-        href: '/dashboard/einstellungen?section=business',
-        icon: Building2
-      },
-      {
-        name: 'Mitarbeiter',
-        href: '/dashboard/einstellungen?section=staff',
-        icon: Users
-      },
-      {
-        name: 'Benachrichtigungen',
-        href: '/dashboard/einstellungen?section=notifications',
-        icon: Bell
-      },
-      {
-        name: 'E-Mail',
-        href: '/dashboard/einstellungen?section=email',
-        icon: Mail
-      },
-      {
-        name: 'Sicherheit',
-        href: '/dashboard/einstellungen?section=security',
-        icon: Shield
-      },
-      {
-        name: 'Integrationen',
-        href: '/dashboard/einstellungen?section=integrations',
-        icon: Globe
-      }
-    ]
-  }
-]
-
 function DashboardSkeleton() {
   return (
-    <div className="flex h-screen bg-background">
-      <div className="w-64 border-r bg-card">
-        <div className="p-6">
-          <div className="h-8 bg-muted rounded animate-pulse" />
-        </div>
-        <div className="px-4 space-y-2">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-10 bg-muted rounded animate-pulse" />
-          ))}
-        </div>
-      </div>
+    <div className="flex h-full bg-background">
       <div className="flex-1 p-6">
-        <div className="space-y-6">
-          <div className="h-8 bg-muted rounded animate-pulse w-48" />
+        <div className="space-y-6 animate-pulse">
+          <div className="h-8 bg-muted rounded w-48" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted rounded animate-pulse" />
+              <div key={i} className="h-32 bg-muted rounded" />
             ))}
           </div>
         </div>
@@ -162,101 +35,25 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect('/login')
   }
 
-  // Filter navigation items based on user role
-  const allowedNavigation = navigationItems.filter(item => 
-    item.roles.includes(user.role)
-  )
-
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <aside className="w-64 border-r bg-card flex flex-col">
-        {/* Header */}
-        <div className="p-6 border-b">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <LayoutDashboard className="w-5 h-5 text-primary-foreground" />
+    <div className="flex h-screen overflow-hidden bg-background">
+      {/* Responsive Sidebar */}
+      <ResponsiveSidebar user={user} />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Navbar */}
+        <DashboardNavbar userRole={user.role} />
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto">
+          <Suspense fallback={<DashboardSkeleton />}>
+            <div className="container mx-auto p-4 lg:p-6 max-w-[1600px]">
+              {children}
             </div>
-            <div>
-              <h2 className="font-semibold text-lg">Badezeit</h2>
-              <p className="text-sm text-muted-foreground">Admin Panel</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="space-y-2">
-            {allowedNavigation.map((item) => {
-              // Si el item tiene subitems, usar CollapsibleNavItem
-              if (item.subItems && item.subItems.length > 0) {
-                return (
-                  <CollapsibleNavItem
-                    key={item.href}
-                    name={item.name}
-                    href={item.href}
-                    icon={item.icon}
-                    subItems={item.subItems}
-                    roles={item.roles}
-                  />
-                )
-              }
-
-              // Si no tiene subitems, renderizar item normal
-              const Icon = item.icon
-              return (
-                <li key={item.href}>
-                  <Link href={item.href}>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-3 h-10 font-normal"
-                    >
-                      <Icon className="w-4 h-4" />
-                      {item.name}
-                    </Button>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
-
-        {/* User Section */}
-        <div className="p-4 border-t">
-          <div className="flex items-center gap-3 mb-4">
-            {/* User avatar */}
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-gray-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium">
-                {user.firstName} {user.lastName}
-              </p>
-              <p className="text-xs text-muted-foreground">{user.role}</p>
-            </div>
-          </div>
-          
-          {/* Logout Button */}
-          <LogoutButton 
-            className="w-full justify-start gap-3 h-10 font-normal" 
-            variant="ghost"
-          />
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        {/* Header with Search */}
-        <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex h-16 items-center gap-4 px-6">
-            <CommandMenu userRole={user.role} />
-          </div>
-        </div>
-
-        <Suspense fallback={<DashboardSkeleton />}>
-          {children}
-        </Suspense>
-      </main>
+          </Suspense>
+        </main>
+      </div>
     </div>
   )
 }

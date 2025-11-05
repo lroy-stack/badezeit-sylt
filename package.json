@@ -15,9 +15,6 @@
     "db:reset": "prisma db push --force-reset && npm run db:seed",
     "type-check": "tsc --noEmit"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@clerk/nextjs": "^6.34.3",
     "@ducanh2912/next-pwa": "^10.2.9",

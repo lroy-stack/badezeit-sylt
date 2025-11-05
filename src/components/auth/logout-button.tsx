@@ -10,12 +10,14 @@ interface LogoutButtonProps {
   className?: string
   variant?: 'default' | 'ghost' | 'outline'
   size?: 'default' | 'sm' | 'lg' | 'icon'
+  showText?: boolean
 }
 
-export function LogoutButton({ 
-  className, 
+export function LogoutButton({
+  className,
   variant = 'ghost',
-  size = 'sm'
+  size = 'sm',
+  showText = true
 }: LogoutButtonProps) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -54,7 +56,7 @@ export function LogoutButton({
       ) : (
         <LogOut className="w-4 h-4" />
       )}
-      {size !== 'icon' && (
+      {showText && size !== 'icon' && (
         <span className="ml-2">
           {loading ? 'Abmelden...' : 'Abmelden'}
         </span>
