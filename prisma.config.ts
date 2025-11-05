@@ -1,21 +1,13 @@
 import { defineConfig } from 'prisma/config'
+import path from 'node:path'
 
 export default defineConfig({
-  // Seed configuration
-  seed: {
-    command: 'tsx prisma/seed.ts',
-  },
+  // Schema location
+  schema: path.join('prisma', 'schema.prisma'),
 
-  // Generator configuration
-  generator: {
-    provider: 'prisma-client-js',
-    output: '../node_modules/@prisma/client',
-    previewFeatures: [],
-  },
-
-  // Database configuration (pulled from .env)
-  datasource: {
-    provider: 'postgresql',
-    url: process.env.DATABASE_URL,
+  // Migrations configuration with seed command
+  migrations: {
+    path: path.join('prisma', 'migrations'),
+    seed: 'tsx prisma/seed.ts',
   },
 })
