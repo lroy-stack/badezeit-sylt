@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { QueryProvider } from '@/components/providers/query-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
+import { FloatingThemeToggle } from '@/components/floating-theme-toggle'
 import { Toaster } from '@/components/ui/sonner'
 import "./globals.css";
 
@@ -33,12 +34,13 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <QueryProvider>
             {children}
+            <FloatingThemeToggle />
             <Toaster />
           </QueryProvider>
         </ThemeProvider>
