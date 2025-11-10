@@ -30,128 +30,181 @@ interface DashboardMetrics {
 }
 
 async function getDashboardMetrics(): Promise<DashboardMetrics> {
-  const heute = new Date()
-  const heuteStart = startOfDay(heute)
-  const heuteEnd = endOfDay(heute)
-  const gestern = subDays(heute, 1)
-  const gesternStart = startOfDay(gestern)
-  const gesternEnd = endOfDay(gestern)
+  try {
+    console.log('[Dashboard] Fetching metrics...')
+    const heute = new Date()
+    const heuteStart = startOfDay(heute)
+    const heuteEnd = endOfDay(heute)
+    const gestern = subDays(heute, 1)
+    const gesternStart = startOfDay(gestern)
+    const gesternEnd = endOfDay(gestern)
 
-  // Get today's reservations
-  const [totalReservationsHeute, confirmedReservationsHeute, pendingReservationsHeute] = await Promise.all([
-    db.reservation.count({ 
-      where: { 
-        dateTime: { gte: heuteStart, lte: heuteEnd } 
-      } 
-    }),
-    db.reservation.count({ 
-      where: { 
-        dateTime: { gte: heuteStart, lte: heuteEnd },
-        status: 'CONFIRMED'
-      } 
-    }),
-    db.reservation.count({ 
-      where: { 
-        dateTime: { gte: heuteStart, lte: heuteEnd },
-        status: 'PENDING'
-      } 
-    })
-  ])
-
-  // Get yesterday's reservations for comparison
-  const totalReservationsGestern = await db.reservation.count({ 
-    where: { 
-      dateTime: { gte: gesternStart, lte: gesternEnd } 
-    } 
-  })
-
-  // Get customer metrics
-  const [neueKundenHeute, gesamtKundenHeute, vipKunden] = await Promise.all([
-    db.customer.count({ 
-      where: { 
-        createdAt: { gte: heuteStart, lte: heuteEnd } 
-      } 
-    }),
-    db.customer.count(),
-    db.customer.count({ 
-      where: { isVip: true } 
-    })
-  ])
-
-  const neueKundenGestern = await db.customer.count({ 
-    where: { 
-      createdAt: { gte: gesternStart, lte: gesternEnd } 
-    } 
-  })
-
-  // Calculate occupancy (simplified)
-  const totalTables = await db.table.count({ where: { isActive: true } })
-  const occupiedTables = await db.reservation.count({
-    where: {
-      dateTime: { gte: heuteStart, lte: heuteEnd },
-      status: { in: ['CONFIRMED', 'SEATED'] }
+    // Test DB connection first
+    try {
+      await db.$queryRaw`SELECT 1`
+      console.log('[Dashboard] Database connection OK')
+    } catch (dbError) {
+      console.error('[Dashboard] Database connection failed:', dbError)
+      throw new Error('Database connection failed')
     }
-  })
-  
-  const aktuelleAuslastung = totalTables > 0 ? Math.round((occupiedTables / totalTables) * 100) : 0
-  const durchschnittAuslastung = 75 // This would be calculated from historical data
 
-  return {
-    heute: {
-      reservierungen: {
-        gesamt: totalReservationsHeute,
-        bestaetigt: confirmedReservationsHeute,
-        wartend: pendingReservationsHeute
-      },
-      auslastung: {
-        aktuell: aktuelleAuslastung,
-        durchschnitt: durchschnittAuslastung
-      },
-      kunden: {
-        neue: neueKundenHeute,
-        wiederkehrend: gesamtKundenHeute - neueKundenHeute,
-        vip: vipKunden
+    // Get today's reservations
+    console.log('[Dashboard] Fetching today reservations...')
+    const [totalReservationsHeute, confirmedReservationsHeute, pendingReservationsHeute] = await Promise.all([
+      db.reservation.count({
+        where: {
+          dateTime: { gte: heuteStart, lte: heuteEnd }
+        }
+      }),
+      db.reservation.count({
+        where: {
+          dateTime: { gte: heuteStart, lte: heuteEnd },
+          status: 'CONFIRMED'
+        }
+      }),
+      db.reservation.count({
+        where: {
+          dateTime: { gte: heuteStart, lte: heuteEnd },
+          status: 'PENDING'
+        }
+      })
+    ])
+
+    // Get yesterday's reservations for comparison
+    console.log('[Dashboard] Fetching yesterday reservations...')
+    const totalReservationsGestern = await db.reservation.count({
+      where: {
+        dateTime: { gte: gesternStart, lte: gesternEnd }
       }
-    },
-    trends: {
-      reservierungenVsGestern: totalReservationsHeute - totalReservationsGestern,
-      kundenVsGestern: neueKundenHeute - neueKundenGestern
+    })
+
+    // Get customer metrics
+    console.log('[Dashboard] Fetching customer metrics...')
+    const [neueKundenHeute, gesamtKundenHeute, vipKunden] = await Promise.all([
+      db.customer.count({
+        where: {
+          createdAt: { gte: heuteStart, lte: heuteEnd }
+        }
+      }),
+      db.customer.count(),
+      db.customer.count({
+        where: { isVip: true }
+      })
+    ])
+
+    const neueKundenGestern = await db.customer.count({
+      where: {
+        createdAt: { gte: gesternStart, lte: gesternEnd }
+      }
+    })
+
+    // Calculate occupancy (simplified)
+    console.log('[Dashboard] Calculating occupancy...')
+    const totalTables = await db.table.count({ where: { isActive: true } })
+    const occupiedTables = await db.reservation.count({
+      where: {
+        dateTime: { gte: heuteStart, lte: heuteEnd },
+        status: { in: ['CONFIRMED', 'SEATED'] }
+      }
+    })
+
+    const aktuelleAuslastung = totalTables > 0 ? Math.round((occupiedTables / totalTables) * 100) : 0
+    const durchschnittAuslastung = 75 // This would be calculated from historical data
+
+    console.log('[Dashboard] Metrics fetched successfully')
+    return {
+      heute: {
+        reservierungen: {
+          gesamt: totalReservationsHeute,
+          bestaetigt: confirmedReservationsHeute,
+          wartend: pendingReservationsHeute
+        },
+        auslastung: {
+          aktuell: aktuelleAuslastung,
+          durchschnitt: durchschnittAuslastung
+        },
+        kunden: {
+          neue: neueKundenHeute,
+          wiederkehrend: gesamtKundenHeute - neueKundenHeute,
+          vip: vipKunden
+        }
+      },
+      trends: {
+        reservierungenVsGestern: totalReservationsHeute - totalReservationsGestern,
+        kundenVsGestern: neueKundenHeute - neueKundenGestern
+      }
+    }
+  } catch (error) {
+    console.error('[Dashboard] Error fetching metrics:', error)
+    console.error('[Dashboard] Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
+
+    // Return default metrics on error
+    return {
+      heute: {
+        reservierungen: { gesamt: 0, bestaetigt: 0, wartend: 0 },
+        auslastung: { aktuell: 0, durchschnitt: 0 },
+        kunden: { neue: 0, wiederkehrend: 0, vip: 0 }
+      },
+      trends: {
+        reservierungenVsGestern: 0,
+        kundenVsGestern: 0
+      }
     }
   }
 }
 
 async function getUpcomingReservations() {
-  const heute = new Date()
-  const morgen = new Date(heute.getTime() + 24 * 60 * 60 * 1000)
-  
-  return await db.reservation.findMany({
-    where: {
-      dateTime: { gte: heute, lte: morgen },
-      status: { in: ['CONFIRMED', 'PENDING'] }
-    },
-    include: {
-      customer: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          phone: true,
-          email: true,
-          isVip: true
+  try {
+    console.log('[Dashboard] Fetching upcoming reservations...')
+    const heute = new Date()
+    const morgen = new Date(heute.getTime() + 24 * 60 * 60 * 1000)
+
+    const reservations = await db.reservation.findMany({
+      where: {
+        dateTime: { gte: heute, lte: morgen },
+        status: { in: ['CONFIRMED', 'PENDING'] }
+      },
+      include: {
+        customer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            phone: true,
+            email: true,
+            isVip: true
+          }
+        },
+        table: {
+          select: {
+            number: true,
+            location: true
+          }
         }
       },
-      table: {
-        select: {
-          number: true,
-          location: true
-        }
-      }
-    },
-    orderBy: {
-      dateTime: 'asc'
-    },
-    take: 5
-  })
+      orderBy: {
+        dateTime: 'asc'
+      },
+      take: 5
+    })
+
+    console.log(`[Dashboard] Found ${reservations.length} upcoming reservations`)
+    return reservations
+  } catch (error) {
+    console.error('[Dashboard] Error fetching reservations:', error)
+    console.error('[Dashboard] Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
+
+    // Return empty array on error
+    return []
+  }
 }
 
 function MetricCard({ 
@@ -211,7 +264,7 @@ function ReservationStatus({ status }: { status: string }) {
 
 export default async function DashboardPage() {
   const user = await getCurrentUser()
-  
+
   if (!user) {
     return null
   }
@@ -220,6 +273,14 @@ export default async function DashboardPage() {
     getDashboardMetrics(),
     getUpcomingReservations()
   ])
+
+  // Check if we have a database error (all metrics are zero)
+  const hasDatabaseError =
+    metrics.heute.reservierungen.gesamt === 0 &&
+    metrics.heute.auslastung.aktuell === 0 &&
+    metrics.heute.kunden.neue === 0 &&
+    metrics.heute.kunden.wiederkehrend === 0 &&
+    metrics.heute.kunden.vip === 0
 
   return (
     <div className="p-6 space-y-6">
@@ -230,6 +291,21 @@ export default async function DashboardPage() {
           Willkommen zurück, {user.firstName}! Hier ist ein Überblick über Ihr Restaurant.
         </p>
       </div>
+
+      {/* Database Error Warning */}
+      {hasDatabaseError && (
+        <Card className="border-destructive">
+          <CardContent className="flex items-center gap-3 p-4">
+            <AlertCircle className="h-5 w-5 text-destructive" />
+            <div className="flex-1">
+              <p className="font-medium text-destructive">Datenbankverbindung fehlgeschlagen</p>
+              <p className="text-sm text-muted-foreground">
+                Die Dashboard-Daten konnten nicht geladen werden. Bitte überprüfen Sie die Datenbankverbindung oder kontaktieren Sie den Administrator.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
