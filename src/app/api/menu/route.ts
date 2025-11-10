@@ -6,6 +6,25 @@ import { z } from 'zod'
 // GET /api/menu - Get public menu with filtering
 export async function GET(request: NextRequest) {
   try {
+    console.log('[API Menu] Fetching menu...')
+
+    // Test DB connection first
+    try {
+      await db.$queryRaw`SELECT 1`
+      console.log('[API Menu] Database connection OK')
+    } catch (dbError) {
+      console.error('[API Menu] Database connection failed:', dbError)
+      return NextResponse.json(
+        {
+          error: 'Database connection failed',
+          details: dbError instanceof Error ? dbError.message : String(dbError),
+          categories: [],
+          summary: { totalItems: 0, signatureItems: 0, vegetarianItems: 0, veganItems: 0, priceRange: null }
+        },
+        { status: 503 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     
     const filters = {
@@ -224,8 +243,13 @@ export async function GET(request: NextRequest) {
       filters: validatedFilters,
     })
   } catch (error) {
-    console.error('Error fetching menu:', error)
-    
+    console.error('[API Menu] Error fetching menu:', error)
+    console.error('[API Menu] Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid menu filters', details: error.issues },
@@ -233,9 +257,15 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Return empty menu instead of 500 to prevent frontend crash
     return NextResponse.json(
-      { error: 'Failed to fetch menu' },
-      { status: 500 }
+      {
+        error: 'Failed to fetch menu',
+        details: error instanceof Error ? error.message : String(error),
+        categories: [],
+        summary: { totalItems: 0, signatureItems: 0, vegetarianItems: 0, veganItems: 0, priceRange: null }
+      },
+      { status: 200 } // Return 200 with empty data to prevent frontend errors
     )
   }
 }
