@@ -171,8 +171,8 @@ export function NewReservationForm({
 
       if (response.ok) {
         const { availableTables: available } = await response.json()
-        const filteredTables = tables.filter(table => 
-          available.some((avail: any) => avail.id === table.id) &&
+        const filteredTables = tables.filter(table =>
+          available && Array.isArray(available) && available.some((avail: any) => avail.id === table.id) &&
           table.capacity >= reservationData.partySize!
         )
         setAvailableTables(filteredTables)

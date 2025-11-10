@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { ChevronRight, Search } from "lucide-react"
 import { CommandMenu } from "@/components/command-menu"
@@ -37,6 +37,7 @@ const settingsSections: Record<string, string> = {
 
 export function DashboardNavbar({ userRole }: DashboardNavbarProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   // Generar breadcrumbs
   const generateBreadcrumbs = () => {
@@ -50,9 +51,9 @@ export function DashboardNavbar({ userRole }: DashboardNavbarProps) {
       // Obtener título del segmento
       let label = routeTitles[currentPath] || segment.charAt(0).toUpperCase() + segment.slice(1)
 
-      // Si es un ID (número o cuid), mostrar como "Detalles"
+      // Si es un ID (número o cuid), mostrar como "Details"
       if (/^[0-9a-z-]+$/i.test(segment) && segment.length > 10) {
-        label = 'Detalles'
+        label = 'Details'
       }
 
       breadcrumbs.push({
@@ -68,7 +69,6 @@ export function DashboardNavbar({ userRole }: DashboardNavbarProps) {
 
   // Obtener título de la página actual
   const getCurrentPageTitle = () => {
-    const searchParams = new URLSearchParams(window.location.search)
     const section = searchParams.get('section')
 
     if (section && pathname.includes('einstellungen')) {
@@ -82,7 +82,7 @@ export function DashboardNavbar({ userRole }: DashboardNavbarProps) {
 
   React.useEffect(() => {
     setPageTitle(getCurrentPageTitle())
-  }, [pathname])
+  }, [pathname, searchParams])
 
   return (
     <div className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

@@ -217,7 +217,7 @@ export function ResponsiveSidebar({ user }: ResponsiveSidebarProps) {
           {(!isCollapsed || isMobile) && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {user.firstName || 'Usuario'} {user.lastName || ''}
+                {user.firstName || 'Benutzer'} {user.lastName || ''}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {user.role}
