@@ -111,8 +111,8 @@ const navigationItems: NavigationItem[] = [
 
 interface ResponsiveSidebarProps {
   user: {
-    firstName: string
-    lastName: string
+    firstName: string | null
+    lastName: string | null
     role: string
     email?: string
   }
@@ -217,7 +217,7 @@ export function ResponsiveSidebar({ user }: ResponsiveSidebarProps) {
           {(!isCollapsed || isMobile) && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {user.firstName} {user.lastName}
+                {user.firstName || 'Usuario'} {user.lastName || ''}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {user.role}
