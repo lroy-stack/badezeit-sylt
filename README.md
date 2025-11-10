@@ -1,10 +1,10 @@
 # Strandrestaurant Badezeit - Website & Restaurantmanagement
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.0.1-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.1.0-blue?style=flat-square&logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-6.14.0-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.18.0-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
 
 > **WICHTIGER HINWEIS**: Das Strandrestaurant Badezeit ist aufgrund eines Brandes derzeit geschlossen. Die Wiedereröffnung ist für 2025 geplant.
 
@@ -24,21 +24,24 @@ Dies ist die **offizielle Website** des **Strandrestaurant Badezeit** - einem au
 ## 🏗️ Technische Architektur
 
 ### Frontend-Stack
-- **Framework**: Next.js 15 mit App Router
-- **React**: Version 19.1.0
-- **TypeScript**: Vollständige Typisierung
+- **Framework**: Next.js 16.0.1 mit App Router + Turbopack
+- **React**: Version 19.1.0 (stable)
+- **TypeScript**: Vollständige strict mode Typisierung
 - **Styling**: Tailwind CSS 4.x mit shadcn/ui Komponenten
 - **Icons**: Lucide React
-- **Animationen**: tw-animate-css
+- **Animationen**: Framer Motion + tw-animate-css
+- **UI-Komponenten**: shadcn/ui (Radix UI primitives)
+- **Theming**: 5 OKLCH-Farbschemata (Coral, Ocean, Forest, Sunset, Midnight)
 
 ### Backend & Datenbank
-- **Datenbank**: PostgreSQL (Supabase)
-- **ORM**: Prisma 6.14.0
-- **Authentifizierung**: Clerk (Development-Modus bei fehlenden Keys)
+- **Datenbank**: PostgreSQL (Supabase) mit Connection Pooling (PgBouncer)
+- **ORM**: Prisma 6.18.0 (mit prisma.config.ts)
+- **Authentifizierung**: Supabase Auth mit SSR-Integration
 - **Email**: React Email mit Resend Integration
 - **Formulare**: React Hook Form mit Server Actions und Zod-Validierung
-- **Export**: jsPDF (PDF-Generation) + XLSX (Excel-Export)
-- **State Management**: TanStack Query für Server-State
+- **Export**: ExcelJS (Excel-Export) + jsPDF (PDF-Generation)
+- **State Management**: TanStack Query v5 für Server-State
+- **Architecture**: Next.js 16 ohne Middleware - Auth in Data Access Layer
 
 ### Deployment & Hosting
 - **Plattform**: Vercel (Next.js optimiert)
@@ -69,27 +72,29 @@ npm install
 Erstellen Sie eine `.env.local` Datei im Hauptverzeichnis:
 
 ```env
-# Database
-DATABASE_URL="postgresql://postgres:password@host:5432/database"
+# Database (WICHTIG: Verwenden Sie Connection Pooler für Vercel/Produktion)
+# Development (Direct Connection - Port 5432):
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.xxx.supabase.co:5432/postgres"
 
-# Clerk Authentication (optional - Development Mode wenn leer)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=""
-CLERK_SECRET_KEY=""
-NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
-NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
+# Production/Vercel (Connection Pooler - Port 6543):
+# DATABASE_URL="postgresql://postgres.xxx:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+
+# Supabase Authentication
+NEXT_PUBLIC_SUPABASE_URL="https://xxx.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGc..."
 
 # Email (Resend)
-RESEND_API_KEY=""
+RESEND_API_KEY="re_..."
 RESEND_FROM_EMAIL="noreply@badezeit.de"
-
-# ImageKit CDN
-NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=""
-IMAGEKIT_PUBLIC_KEY=""
-IMAGEKIT_PRIVATE_KEY=""
 
 # Analytics (optional)
 NEXT_PUBLIC_GA_ID=""
 ```
+
+**⚠️ WICHTIG für Vercel/Produktion:**
+- Verwenden Sie IMMER den Connection Pooler (Port 6543) mit `?pgbouncer=true`
+- Niemals Direct Connection (Port 5432) in serverless Umgebungen
+- Siehe `VERCEL_DATABASE_CONFIG.md` für detaillierte Anleitung
 
 ### 4. Datenbank einrichten
 ```bash
@@ -141,19 +146,94 @@ npm run dev
 # 4. Teste alle Tab-Navigationen im Speisekarte-Bereich
 ```
 
+## 🎨 Admin Panel (Neu Gestaltet für Next.js 16)
+
+Das Admin-Panel wurde vollständig neu gestaltet mit modernem, flüssigem und responsive Design.
+
+### Hauptmerkmale
+
+#### 1. Responsive Layout
+- **Kollapierbarer Sidebar**: 80px ↔ 280px (Desktop)
+- **Mobile Hamburger-Menü**: Touch-optimiert für Smartphones
+- **Smooth Animations**: Framer Motion für flüssige Übergänge
+- **Dark Mode Support**: Vollständige Unterstützung aller 5 Themes
+
+#### 2. Navigation System
+- **Breadcrumbs**: Dynamische Navigation mit aktuellem Pfad
+- **Command Menu**: Globale Suche (Cmd+K / Ctrl+K)
+- **Role-based Access**: Automatische Filterung nach Benutzerrolle
+- **Collapsible Sub-items**: Einstellungen mit Untermenü
+
+#### 3. Einstellungen-Seite (4 Hauptabschnitte)
+
+**📍 Allgemein**
+- Restaurant-Informationen (Name, Beschreibung, Website)
+- Regional-Einstellungen (Sprache, Zeitzone, Währung)
+- Datums- und Zeitformate
+- Kontaktinformationen (Telefon, E-Mail, Adresse)
+
+**🎨 Branding**
+- Logo- und Favicon-Upload
+- Farbschema (Primär-, Sekundär-, Akzentfarbe)
+- Visuelle Identität
+- Color Picker Integration
+
+**🔔 Benachrichtigungen**
+- E-Mail-Benachrichtigungen (An/Aus)
+- SMS-Benachrichtigungen (An/Aus)
+- Absender-E-Mail konfigurieren
+- Template-Verwaltung (geplant)
+
+**🛡️ System**
+- Benutzerstatistiken (Total, Admins, Manager, Staff)
+- Wartungsmodus-Schalter
+- Automatische Backups (Häufigkeit konfigurierbar)
+- Backup herunterladen/hochladen
+- Datenaufbewahrung
+
+#### 4. Design-Prinzipien
+- **Mobile-First**: Optimiert für Touch-Geräte
+- **WCAG-konform**: Barrierefreie Bedienelemente
+- **Konsistente Typografie**: Inter Font-Family
+- **Spacing System**: Konsistente Abstände (4px Basis)
+- **Card-based Layout**: Übersichtliche Gruppierung
+
+### Technische Verbesserungen
+
+#### Prisma Configuration
+```typescript
+// Migriert von package.json zu prisma.config.ts
+export default defineConfig({
+  seed: {
+    command: 'tsx prisma/seed.ts',
+  },
+  generator: {
+    provider: 'prisma-client-js',
+    output: '../node_modules/@prisma/client',
+  },
+})
+```
+
+#### Server/Client Components
+- Klare Trennung zwischen Server und Client Components
+- Optimale Performance durch selective hydration
+- Suspense boundaries für besseres Loading UX
+
+#### Lazy Loading
+- Dynamische Imports für große Komponenten
+- Code-Splitting nach Routen
+- Optimierte Bundle-Größe
+
 ## 📁 Projektstruktur
 
 ```
 badezeit-sylt/
 ├── src/
 │   ├── app/                    # Next.js App Router
-│   │   ├── (auth)/            # Authentifizierung (Clerk)
-│   │   │   ├── sign-in/       # Anmelde-Seite
-│   │   │   └── sign-up/       # Registrierungs-Seite
+│   │   ├── login/             # Login-Seite (Supabase Auth)
 │   │   ├── actions/           # Server Actions
 │   │   │   └── contact.ts     # Kontaktformular-Action
 │   │   ├── api/               # API Routes
-│   │   │   ├── webhooks/      # Clerk Webhooks
 │   │   │   ├── availability/  # Verfügbarkeitsprüfung
 │   │   │   ├── reservations/  # Reservierungen API
 │   │   │   ├── customers/     # Kunden API (GDPR-konform)
@@ -218,13 +298,14 @@ badezeit-sylt/
 │   │   ├── use-gallery.ts     # Galerie-Hook
 │   │   ├── use-settings.ts    # System-Settings Hook
 │   │   └── use-dashboard-metrics.ts # Dashboard-Daten
-│   ├── middleware/            # Middleware-Logik
-│   │   ├── types.ts           # Middleware-Typen
-│   │   ├── prod.ts            # Produktions-Middleware
-│   │   └── dev.ts             # Entwicklungs-Middleware
-│   └── lib/                   # Utilities & Konfiguration
-│       ├── db.ts              # Prisma Client Setup
-│       ├── auth.ts            # Auth Utilities & Rollen
+│   ├── utils/                 # Utility Functions
+│   │   └── supabase/          # Supabase Helpers
+│   │       ├── client.ts      # Browser Client
+│   │       ├── server.ts      # Server Client (SSR)
+│   │       └── middleware.ts  # Session Management Helper
+│   └── lib/                   # Core Utilities & Konfiguration
+│       ├── db.ts              # Prisma Client Setup mit Connection Pooling
+│       ├── auth.ts            # Supabase Auth Utilities & Role Management
 │       ├── utils.ts           # Utility-Funktionen
 │       ├── restaurant-utils.ts # Restaurant-spezifische Utils
 │       ├── email/             # E-Mail System
@@ -255,13 +336,21 @@ badezeit-sylt/
 │   ├── COMPONENTS.md          # Komponenten-Guide
 │   ├── DEPLOYMENT.md          # Deployment-Guide
 │   └── MAINTENANCE.md         # Wartungshandbuch
-├── middleware.ts              # Next.js Middleware (Auth/Routing)
+├── VERCEL_DATABASE_CONFIG.md  # Anleitung für Vercel DB Connection Pooler
+├── TECHNICAL_AUDIT_REPORT.md  # Technischer Audit-Bericht
+├── prisma.config.ts           # Prisma 6.18 Konfiguration
 ├── tailwind.config.js         # Tailwind CSS Konfiguration
 ├── components.json            # shadcn/ui Konfiguration
 ├── tsconfig.json              # TypeScript Konfiguration
 ├── eslint.config.mjs          # ESLint Konfiguration
-├── next.config.ts             # Next.js Konfiguration
+├── next.config.ts             # Next.js 16 Konfiguration (Turbopack)
 └── package.json               # Dependencies & Scripts
+```
+
+**📝 Hinweis zu Next.js 16:**
+- Kein `middleware.ts` mehr - Next.js 16 verwendet Proxy-Pattern
+- Authentifizierung in Data Access Layer (src/lib/auth.ts)
+- Session Management in Supabase Helpers (src/utils/supabase/)
 ```
 
 ## 🌐 Website-Features
@@ -332,7 +421,7 @@ Das umfassende Restaurantmanagement-System bietet folgende Module:
 - **Dashboard-Metriken**: Live-Reservierungsstatistiken, Umsätze, Trends
 - **Export-Manager**: PDF- und Excel-Export mit professioneller Formatierung
 - **PDF-Generation**: jsPDF mit AutoTable für strukturierte Reports
-- **Excel-Export**: XLSX (SheetJS) mit mehreren Arbeitsblättern
+- **Excel-Export**: ExcelJS (sicher, keine Vulnerabilities) mit mehreren Arbeitsblättern
 - **Umfassende Berichte**: Zusammenfassung, Tageswerte, Leistungskennzahlen
 - **Konfigurierbare Exports**: Anpassbare Inhalte und Zeiträume
 - **Performance-Analyse**: RevPASH, Auslastung, Durchschnittswerte
@@ -376,11 +465,13 @@ Das Projekt nutzt Next.js 15 App Router mit strategischer Komponentenverteilung:
 - **Client Components**: Interaktive Features (alle Admin-Formulare, Export-Manager)
 - **Neue Client Components**: Switch, TabsNavigation, AllergenManager, PhotoManager, MenuSettingsManager, ExportManager
 
-### Authentifizierung
-- **Clerk Integration**: Vollständiges Auth-System
-- **Development Mode**: Automatisch deaktiviert bei fehlenden Keys
+### Authentifizierung & Authorization
+- **Supabase Auth**: Vollständiges SSR-Auth-System
+- **Session Management**: Supabase SSR Helpers für Server/Client
 - **Rollenbasiert**: ADMIN, MANAGER, STAFF, KITCHEN
-- **Route Protection**: Middleware für Admin-Panel-Zugang
+- **Route Protection**: Auth-Prüfung in Data Access Layer (src/lib/auth.ts)
+- **Demo-Modus**: Login mit demouser@badezeit.de / badezeit00
+- **Next.js 16 Pattern**: Keine Middleware - Auth direkt in Route Handlers
 
 ### Formular-Handling
 - **React Hook Form**: Performante Formularverarbeitung mit Validierung
@@ -396,10 +487,12 @@ Das Projekt nutzt Next.js 15 App Router mit strategischer Komponentenverteilung:
 - Multi-Page-Support mit automatischem Umbruch
 - Tabellen mit Styling und korrekter Ausrichtung
 
-**Excel-Export (XLSX):**
-- Multi-Sheet-Arbeitsmappen
+**Excel-Export (ExcelJS):**
+- Sichere Alternative zu xlsx (keine Sicherheitslücken)
+- Multi-Sheet-Arbeitsmappen mit Styling
 - Automatische Spaltenbreitenoptimierung
-- Formatierte Zahlen und Datumswerte
+- Formatierte Zahlen, Datumswerte und Formeln
+- TypeScript-first Design
 - Strukturierte Datenorganisation
 
 ### Datenbankintegration
@@ -434,21 +527,34 @@ npm i -g vercel
 # 2. Projekt verknüpfen
 vercel link
 
-# 3. Umgebungsvariablen setzen
+# 3. Umgebungsvariablen setzen (WICHTIG!)
 vercel env add DATABASE_URL
-vercel env add CLERK_SECRET_KEY
+vercel env add NEXT_PUBLIC_SUPABASE_URL
+vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
+vercel env add RESEND_API_KEY
 # ... weitere Variablen
 
 # 4. Deployment
 vercel --prod
 ```
 
-### Umgebungsvariablen für Produktion
-Stellen Sie sicher, dass alle erforderlichen Umgebungsvariablen in Vercel gesetzt sind:
-- Database URL (Supabase)
-- Clerk Authentication Keys
-- Resend API Key
-- ImageKit Credentials
+### ⚠️ KRITISCH: Umgebungsvariablen für Produktion
+
+**DATABASE_URL (Connection Pooler erforderlich!):**
+```bash
+# ❌ FALSCH (Direct Connection - funktioniert NICHT in Vercel):
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.xxx.supabase.co:5432/postgres"
+
+# ✅ RICHTIG (Connection Pooler - für Vercel/Serverless):
+DATABASE_URL="postgresql://postgres.xxx:[PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
+```
+
+**Weitere erforderliche Variablen:**
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase Project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase Anonymous Key
+- `RESEND_API_KEY` - Email-Versand (optional)
+
+**📖 Siehe:** `VERCEL_DATABASE_CONFIG.md` für detaillierte Schritt-für-Schritt Anleitung
 
 ## 📞 Support & Wartung
 
@@ -468,13 +574,31 @@ Stellen Sie sicher, dass alle erforderlichen Umgebungsvariablen in Vercel gesetz
 8. **Bilder hinzufügen**: ImageKit CDN + Galerie-Management
 
 ### Troubleshooting
-- **Build-Fehler**: Typprüfung mit `npm run type-check`
-- **Datenbank-Probleme**: Prisma Studio mit `npm run db:studio`
-- **Auth-Probleme**: Clerk-Konfiguration prüfen
-- **Export-Probleme**: Browser-Konsole prüfen, jsPDF/XLSX Kompatibilität
-- **Formular-Validierung**: Zod-Schema-Fehler in Browser-Konsole
-- **Switch-Komponente fehlt**: `npm install @radix-ui/react-switch`
-- **Seeding-Fehler**: `npm run db:reset` für kompletten Neustart
+
+**Build-Fehler:**
+- TypeScript: `npm run type-check`
+- Build lokal testen: `npm run build`
+
+**Datenbank-Probleme:**
+- Prisma Studio: `npm run db:studio`
+- Schema-Probleme: `npx prisma generate`
+- **"Application error" in Produktion**: DATABASE_URL prüfen (muss Connection Pooler Port 6543 sein!)
+- **"too many clients"**: Connection Pooler verwenden, nicht Direct Connection
+
+**Authentifizierung:**
+- Supabase URL/Keys in Vercel Environment Variables prüfen
+- Demo-Login: demouser@badezeit.de / badezeit00
+- Session-Probleme: Browser-Cookies löschen
+
+**Export-Probleme:**
+- Browser-Konsole prüfen
+- ExcelJS/jsPDF Kompatibilität testen
+- Memory-Limits bei großen Exporten beachten
+
+**Weitere:**
+- Formular-Validierung: Zod-Schema-Fehler in Browser-Konsole
+- Switch-Komponente fehlt: `npm install @radix-ui/react-switch`
+- Seeding-Fehler: `npm run db:reset` für kompletten Neustart
 
 ## 📝 Lizenz
 
